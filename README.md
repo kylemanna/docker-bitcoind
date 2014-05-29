@@ -3,6 +3,15 @@ docker-bitcoind
 
 Docker image that runs a bitcoind node in a container for easy deployment.
 
+Requirements
+------------
+
+* Machine, Cloud, or VPS that supports Docker (i.e. EC2 Digital Ocean, KVM or XEN based VMs) running something like Ubuntu 14.04 or later (not OpenVZ containers!)
+* At least 30 GB to store the block chain files
+* 1GB RAM (maybe less, haven't test)
+
+Tested on Digital Ocean's 1GB / 1 CPU / 30GB droplet.
+
 Quick Start
 -----------
 
