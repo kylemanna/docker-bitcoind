@@ -33,3 +33,4 @@ Todo
 
 - [ ] Add Ubuntu 14.04 quick start guide
 - [ ] Add Ubuntu upstart init script
+- [ ] Review possiblity of bootstraping blockchain via BitTorrent
