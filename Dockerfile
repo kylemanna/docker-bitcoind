@@ -1,8 +1,8 @@
 FROM ubuntu:14.04
 MAINTAINER Kyle Manna <kyle@kylemanna.com>
 
-RUN apt-get install -y software-properties-common
-RUN add-apt-repository -y ppa:bitcoin/bitcoin
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8842ce5e
+RUN echo "deb http://ppa.launchpad.net/bitcoin/bitcoin/ubuntu trusty main" > /etc/apt/sources.list.d/bitcoin.list
 RUN apt-get update
 RUN apt-get install -y bitcoind
 
