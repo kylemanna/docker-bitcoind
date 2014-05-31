@@ -7,7 +7,7 @@ RUN apt-get update
 RUN apt-get install -y bitcoind
 
 ENV HOME /bitcoin
-RUN useradd --create-home --home-dir /bitcoin bitcoin
+RUN useradd -s /bin/bash -m -d /bitcoin bitcoin
 
 ADD bitcoind.sh /usr/local/bin/
 RUN chmod a+x /usr/local/bin/bitcoind.sh
