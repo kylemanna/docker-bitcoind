@@ -11,6 +11,7 @@ RUN useradd -s /bin/bash -m -d /bitcoin bitcoin
 
 ADD bitcoind.sh /bitcoin/
 RUN chmod a+x /bitcoin/bitcoind.sh
+RUN chown bitcoin:bitcoin -R /bitcoin
 
 # For some reason, docker.io (0.9.1~dfsg1-2) pkg in Ubuntu 14.04 has permission
 # denied issues when executing /bin/bash from trusted builds.  Building locally
