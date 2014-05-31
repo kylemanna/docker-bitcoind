@@ -9,17 +9,20 @@ RUN apt-get install -y bitcoind
 ENV HOME /bitcoin
 RUN useradd -s /bin/bash -m -d /bitcoin bitcoin
 
-ADD bitcoind.sh /usr/local/bin/
-RUN chmod a+x /usr/local/bin/bitcoind.sh
+ADD bitcoind.sh /bitcoin/
+RUN chmod a+x /bitcoin/bitcoind.sh
 
-# FIXME: Get a strange permission denied error with bash, not sure why yet
+# For some reason, docker.io (0.9.1~dfsg1-2) pkg in Ubuntu 14.04 has permission
+# denied issues when executing /bin/bash from trusted builds.  Building locally
+# works fine and use the upstream docker (0.11.1) pkg from
+# http://get.docker.io/ubuntu works fine.
 USER bitcoin
 
 VOLUME ["/bitcoin"]
 
 EXPOSE 8332 8333
 
-ENTRYPOINT ["/usr/local/bin/bitcoind.sh"]
+ENTRYPOINT ["/bitcoin/bitcoind.sh"]
 
 # Default arguments, can be overriden
 CMD ["run", "-disablewallet"]
