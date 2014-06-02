@@ -35,4 +35,7 @@ docker rm bitcoind-data bitcoind-node || true
 docker pull kylemanna/bitcoind
 
 docker run --name=bitcoind-data kylemanna/bitcoind init
-docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 -p 127.0.0.1:8332:8332 kylemanna/bitcoind run -disablewallet -rpcallowip=*
+docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 -p 127.0.0.1:8332:8332 kylemanna/bitcoind bitcoind -disablewallet -rpcallowip=*
+
+echo "JSON RPC credentials:"
+docker run --volumes-from=bitcoind-data --rm -it kylemanna/bitcoind getconfig
