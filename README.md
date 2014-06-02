@@ -12,6 +12,13 @@ Requirements
 
 Tested on Digital Ocean's 1GB / 1 CPU / 30GB droplet.
 
+Really Fast Quick Start
+-----------------------
+
+One liner for Ubuntu 14.04 LTS machines:
+
+    $ curl https://raw.githubusercontent.com/kylemanna/docker-bitcoind/master/bootstrap-host.sh | sh -s trusty
+
 Quick Start
 -----------
 
