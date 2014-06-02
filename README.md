@@ -15,7 +15,7 @@ Tested on Digital Ocean's 1GB / 1 CPU / 30GB droplet.
 Really Fast Quick Start
 -----------------------
 
-One liner for Ubuntu 14.04 LTS machines:
+One liner for Ubuntu 14.04 LTS machines with JSON-RPC enabled on localhost:
 
     $ curl https://raw.githubusercontent.com/kylemanna/docker-bitcoind/master/bootstrap-host.sh | sh -s trusty
 
