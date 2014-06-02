@@ -14,13 +14,18 @@ init() {
 
 case $cmd in
    shell)
-      bash -l "$@"
+      sh -c "$*"
+      exit $?
+      ;;
+   login)
+      bash -l
+      exit $?
       ;;
    init)
-      init "@"
+      init
       exit 0
       ;;
-   run)
+   bitcoind)
       bitcoind "$@"
       exit $?
       ;;
