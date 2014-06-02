@@ -14,7 +14,7 @@ init() {
 
 case $cmd in
    shell)
-      bash -l
+      bash -l "$@"
       ;;
    init)
       init "@"
@@ -23,6 +23,9 @@ case $cmd in
    run)
       bitcoind "$@"
       exit $?
+      ;;
+   log)
+      tail -f $HOME/.bitcoin/debug.log
       ;;
    *)
       echo "Unknown cmd $cmd"
