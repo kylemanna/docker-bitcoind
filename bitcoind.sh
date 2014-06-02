@@ -27,6 +27,9 @@ case $cmd in
    log)
       tail -f $HOME/.bitcoin/debug.log
       ;;
+   getconfig)
+      cat $HOME/.bitcoin/bitcoin.conf
+      ;;
    *)
       echo "Unknown cmd $cmd"
       exit 1
