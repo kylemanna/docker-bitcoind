@@ -34,8 +34,17 @@ Quick Start
 Debugging
 ---------
 
-    $ docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 kylemanna/bitcoind run -printtoconsole -disablewallet
-    $ docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 kylemanna/bitcoind shell
+    $ docker run --volumes-from=bitcoind-data --rm -it -p 8333:8333 kylemanna/bitcoind run -printtoconsole -disablewallet
+    $ docker run --volumes-from=bitcoind-data --rm -it -p 8333:8333 kylemanna/bitcoind shell
+
+
+Enable JSON-RPC
+---------------
+
+The following Docker run line will create a container with JSON-RPC enabled and will only allow Docker host to access the JSON RPC port 8332.
+
+    $ docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 -p 127.0.0.1:8332:8332 kylemanna/bitcoind run -disablewallet -rpcallowip=*
+
 
 Todo
 ----
