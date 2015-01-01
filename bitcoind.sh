@@ -29,7 +29,7 @@ init() {
 	  exit 1
 	fi
 	
-	aria2c --dir=$HOME/.bitcoin --seed-time=0 $link
+	aria2c --dir=$HOME/.bitcoin --listen-port=6881 --dht-listen-port=6882 --seed-time=0 $link
 	
 	exit $?
       fi

@@ -24,7 +24,7 @@ USER bitcoin
 
 VOLUME ["/bitcoin"]
 
-EXPOSE 8332 8333
+EXPOSE 8332 8333 6881 6882
 
 ENTRYPOINT ["/usr/local/bin/bitcoind.sh"]
 
