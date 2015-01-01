@@ -26,4 +26,4 @@ EXPOSE 8332 8333
 ENTRYPOINT ["/usr/local/bin/bitcoind.sh"]
 
 # Default arguments, can be overriden
-CMD ["bitcoind", "-disablewallet"]
+CMD ["bitcoind", "-printtoconsole", "-disablewallet"]

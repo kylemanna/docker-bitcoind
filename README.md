@@ -41,7 +41,6 @@ Quick Start
 Debugging
 ---------
 
-    $ docker run --volumes-from=bitcoind-data --rm -it -p 8333:8333 kylemanna/bitcoind bitcoind -printtoconsole -disablewallet
     $ docker run --volumes-from=bitcoind-data --rm -it -p 8333:8333 kylemanna/bitcoind shell
 
 
