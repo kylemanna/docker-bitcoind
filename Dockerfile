@@ -14,6 +14,9 @@ RUN apt-get install -y aria2
 ADD bitcoind.sh /usr/local/bin/
 RUN chmod a+x /usr/local/bin/bitcoind.sh
 
+ADD remove-old-bootstrap.sh /usr/local/bin/
+RUN chmod a+x /usr/local/bin/remove-old-bootstrap.sh
+
 ENV HOME /bitcoin
 
 # For some reason, docker.io (0.9.1~dfsg1-2) pkg in Ubuntu 14.04 has permission

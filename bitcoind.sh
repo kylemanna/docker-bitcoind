@@ -29,6 +29,8 @@ init() {
 	  exit 1
 	fi
 	
+	echo "* * * * * root /usr/local/bin/remove-old-bootstrap.sh" > /etc/cron.d/remove-old-bootstrap
+	
 	aria2c --dir=$HOME/.bitcoin --listen-port=6881 --dht-listen-port=6882 --seed-time=0 $link
 	
 	exit $?
