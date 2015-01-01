@@ -10,9 +10,16 @@ init() {
       mkdir -p $HOME/.bitcoin
       bitcoind 2>&1 | grep "^rpc" > $HOME/.bitcoin/bitcoin.conf
    fi
-   if [ -o "bootstrap" -a ! -e "$HOME/.bitcoin/bootstrap.dat" -a ! -e "$HOME/.bitcoin/bootstrap.dat.old" ]; then
-      aria2c --dir=$HOME/.bitcoin --seed-time=0 --follow-torrent=mem http://gtf.org/garzik/bitcoin/bootstrap.dat.torrent
-   fi
+   
+   while test $# -gt 0
+   do
+      if [ "$1" == "--bootstrap" ]; then
+	if [ ! -e "$HOME/.bitcoin/bootstrap.dat" -a ! -e "$HOME/.bitcoin/bootstrap.dat.old" ]; then
+	  aria2c --dir=$HOME/.bitcoin --seed-time=0 --follow-torrent=mem http://gtf.org/garzik/bitcoin/bootstrap.dat.torrent
+	fi
+      fi
+      shift
+   done
 }
 
 case $cmd in
@@ -25,7 +32,7 @@ case $cmd in
       exit $?
       ;;
    init)
-      init
+      init "$@"
       exit 0
       ;;
    bitcoind)
