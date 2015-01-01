@@ -15,7 +15,7 @@ init() {
    do
       if [ "$1" == "--bootstrap" ]; then
 	if [ ! -e "$HOME/.bitcoin/bootstrap.dat" -a ! -e "$HOME/.bitcoin/bootstrap.dat.old" ]; then
-	  wget http://gtf.org/garzik/bitcoin/bootstrap.txt
+	  aria2c http://gtf.org/garzik/bitcoin/bootstrap.txt
 	  gpg --verify bootstrap.txt
 	  if [ $? -ne 0 ]; then
 	    echo "Couldn't verify bootstrap torrent's signature"
