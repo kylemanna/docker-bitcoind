@@ -1,20 +1,20 @@
 FROM ubuntu:14.04
 MAINTAINER Kyle Manna <kyle@kylemanna.com>
 
-ADD jgarzik-bitpay.asc /tmp/
-RUN gpg --import /tmp/jgarzik-bitpay.asc
+
+RUN useradd -s /bin/bash -m -d /bitcoin bitcoin
+RUN chown bitcoin:bitcoin -R /bitcoin
 
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8842ce5e
 RUN echo "deb http://ppa.launchpad.net/bitcoin/bitcoin/ubuntu trusty main" > /etc/apt/sources.list.d/bitcoin.list
 RUN apt-get update
-RUN apt-get install -y bitcoind aria2
-
-ENV HOME /bitcoin
-RUN useradd -s /bin/bash -m -d /bitcoin bitcoin
-RUN chown bitcoin:bitcoin -R /bitcoin
+RUN apt-get install -y bitcoind
+RUN apt-get install -y aria2
 
 ADD bitcoind.sh /usr/local/bin/
 RUN chmod a+x /usr/local/bin/bitcoind.sh
+
+ENV HOME /bitcoin
 
 # For some reason, docker.io (0.9.1~dfsg1-2) pkg in Ubuntu 14.04 has permission
 # denied issues when executing /bin/bash from trusted builds.  Building locally

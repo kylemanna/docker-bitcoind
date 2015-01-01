@@ -14,25 +14,24 @@ init() {
    while test $# -gt 0
    do
       if [ "$1" == "--bootstrap" ]; then
-	if [ ! -e "$HOME/.bitcoin/bootstrap.dat" -a ! -e "$HOME/.bitcoin/bootstrap.dat.old" ]; then
-	  aria2c http://gtf.org/garzik/bitcoin/bootstrap.txt
-	  gpg --verify bootstrap.txt
-	  if [ $? -ne 0 ]; then
-	    echo "Couldn't verify bootstrap torrent's signature"
-	    exit 1
-	  fi
-	  
-	  link=$(cat bootstrap.txt | grep --color=never "magnet:")
-	  rm bootstrap.txt
-	  if [ -z "$link" ]; then
-	    echo "Couldn't find the bootstrap magnet link"
-	    exit 1
-	  fi
-	  
-	  aria2c --dir=$HOME/.bitcoin --seed-time=0 $link
-	  
-	  exit $?
+	aria2c --dir=$HOME http://gtf.org/garzik/bitcoin/bootstrap.txt
+	gpg --ignore-time-conflict --keyserver pgp.mit.edu --recv-keys 7ADCA079
+	gpg --verify $HOME/bootstrap.txt
+	if [ $? -ne 0 ]; then
+	  echo "Couldn't verify bootstrap torrent's signature"
+	  exit 1
 	fi
+	
+	link=$(cat $HOME/bootstrap.txt | grep --color=never "magnet:")
+	rm $HOME/bootstrap.txt
+	if [ -z "$link" ]; then
+	  echo "Couldn't find the bootstrap magnet link"
+	  exit 1
+	fi
+	
+	aria2c --dir=$HOME/.bitcoin --seed-time=0 $link
+	
+	exit $?
       fi
       shift
    done
