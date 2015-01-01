@@ -37,6 +37,9 @@ Quick Start
         CONTAINER ID        IMAGE                       COMMAND                CREATED             STATUS              PORTS                              NAMES
         5144bdf31fa6        kylemanna/bitcoind:latest   /bitcoin/bitcoind.sh   6 seconds ago       Up 5 seconds        0.0.0.0:8333->8333/tcp, 8332/tcp   bitcoind-node
 
+4. You can then access the daemon's output thanks to the [docker logs command]( https://docs.docker.com/reference/commandline/cli/#logs) (with the container id given by `docker ps`
+
+        $ docker logs -f 5144bdf31fa6
 
 Debugging
 ---------
