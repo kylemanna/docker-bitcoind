@@ -1,6 +1,9 @@
 FROM ubuntu:14.04
 MAINTAINER Kyle Manna <kyle@kylemanna.com>
 
+ADD jgarzik-bitpay.asc /tmp/
+RUN gpg --import /tmp/jgarzik-bitpay.asc
+
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8842ce5e
 RUN echo "deb http://ppa.launchpad.net/bitcoin/bitcoin/ubuntu trusty main" > /etc/apt/sources.list.d/bitcoin.list
 RUN apt-get update
