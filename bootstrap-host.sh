@@ -4,6 +4,8 @@
 #
 set -ex
 
+BTC_IMAGE=${BTC_IMAGE:-kylemanna/bitcoind}
+
 distro=$1
 shift
 
@@ -31,13 +33,16 @@ fi
 docker kill bitcoind-data bitcoind-node || true
 docker rm bitcoind-data bitcoind-node || true
 
-# Always pull to avoid caching issues
-docker pull kylemanna/bitcoind
+# Always pull remote images to avoid caching issues
+if [ -z "${BTC_IMAGE##*/*}" ]; then
+    docker pull $BTC_IMAGE
+fi
 
-docker run --name=bitcoind-data kylemanna/bitcoind init
-docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 -p 127.0.0.1:8332:8332 kylemanna/bitcoind bitcoind -disablewallet -rpcallowip=*
+docker run --name=bitcoind-data -v /bitcoin busybox chown 1000:1000 /bitcoin
+docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE btc_init
+#docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 -p 127.0.0.1:8332:8332 $BTC_IMAGE bitcoind -rpcallowip=*
+curl https://raw.githubusercontent.com/kylemanna/docker-bitcoind/master/upstart.init > /etc/init/docker-bitcoind.conf
+start docker-bitcoind
 
 echo "JSON RPC credentials:"
-# Sleep to allow the node to generate the credentials and avoid the race...
-sleep 1
-docker run --volumes-from=bitcoind-data --rm -it kylemanna/bitcoind getconfig
+docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE cat /bitcoin/.bitcoin/bitcoin.conf
