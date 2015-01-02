@@ -34,8 +34,9 @@ docker rm bitcoind-data bitcoind-node || true
 # Always pull to avoid caching issues
 docker pull kylemanna/bitcoind
 
-docker run --name=bitcoind-data kylemanna/bitcoind init
-docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 -p 127.0.0.1:8332:8332 kylemanna/bitcoind bitcoind -disablewallet -rpcallowip=*
+docker run --name=bitcoind-data busybox true
+docker run --volumes-from=bitcoind-data --rm kylemanna/bitcoind btc_init
+docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 -p 127.0.0.1:8332:8332 kylemanna/bitcoind bitcoind -rpcallowip=*
 
 echo "JSON RPC credentials:"
 docker run --volumes-from=bitcoind-data --rm -it kylemanna/bitcoind cat /bitcoin/.bitcoin/bitcoin.conf
