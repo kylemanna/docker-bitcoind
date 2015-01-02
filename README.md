@@ -3,21 +3,24 @@ docker-bitcoind
 
 Docker image that runs a bitcoind node in a container for easy deployment.
 
+
 Requirements
 ------------
 
-* Machine, Cloud, or VPS that supports Docker (i.e. EC2 Digital Ocean, KVM or XEN based VMs) running something like Ubuntu 14.04 or later (not OpenVZ containers!)
-* At least 30 GB to store the block chain files
-* 1GB RAM (maybe less, haven't test)
+* Physical machine, cloud instance, or VPS that supports Docker (i.e. EC2, [Digital Ocean](https://bit.ly/dobitcoind), KVM or XEN based VMs) running Ubuntu 14.04 or later (not OpenVZ containers!)
+* At least 40 GB to store the block chain files
+* At least 1GB RAM
 
 Tested on Digital Ocean's 1GB / 1 CPU / 30GB droplet.
+
 
 Really Fast Quick Start
 -----------------------
 
-One liner for Ubuntu 14.04 LTS machines with JSON-RPC enabled on localhost:
+One liner for Ubuntu 14.04 LTS machines with JSON-RPC enabled on localhost and adds upstart init script:
 
     curl https://raw.githubusercontent.com/kylemanna/docker-bitcoind/master/bootstrap-host.sh | sh -s trusty
+
 
 Quick Start
 -----------
@@ -34,17 +37,14 @@ Quick Start
 3. Verify that the container is running:
 
         $ docker ps
-        CONTAINER ID        IMAGE                       COMMAND                CREATED             STATUS              PORTS                              NAMES
-        5144bdf31fa6        kylemanna/bitcoind:latest   /bitcoin/bitcoind.sh   6 seconds ago       Up 5 seconds        0.0.0.0:8333->8333/tcp, 8332/tcp   bitcoind-node
+        CONTAINER ID        IMAGE                       COMMAND                CREATED             STATUS              PORTS                                              NAMES
+        b595e548bfa8        kylemanna/bitcoind:latest   "bitcoind -rpcallowi   6 minutes ago       Up 6 minutes        127.0.0.1:8332->8332/tcp, 0.0.0.0:8333->8333/tcp   bitcoind-node
 
 4. You can then access the daemon's output thanks to the [docker logs command]( https://docs.docker.com/reference/commandline/cli/#logs)
 
         docker logs -f bitcoind-node
 
-Debugging
----------
-
-    docker run --volumes-from=bitcoind-data --rm -it -p 8333:8333 kylemanna/bitcoind shell
+5. Install optional init script for upstart provided @ `upstart.init`.
 
 
 Enable JSON-RPC
@@ -55,8 +55,13 @@ The following Docker run line will create a container with JSON-RPC enabled and 
     $ docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 -p 127.0.0.1:8332:8332 kylemanna/bitcoind bitcoind -disablewallet -rpcallowip=*
 
 
+Documentation
+-------------
+
+* Additional documentation in the [docs folder](docs).
+
+
 Todo
 ----
 
-- [ ] Add Ubuntu 14.04 quick start guide
 - [ ] Review possiblity of bootstraping blockchain via BitTorrent
