@@ -38,7 +38,7 @@ if [ -z "${BTC_IMAGE##*/*}" ]; then
     docker pull $BTC_IMAGE
 fi
 
-docker run --name=bitcoind-data busybox true
+docker run --name=bitcoind-data -v /bitcoin busybox chown 1000:1000 /bitcoin
 docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE btc_init
 docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 -p 127.0.0.1:8332:8332 $BTC_IMAGE bitcoind -rpcallowip=*
 
