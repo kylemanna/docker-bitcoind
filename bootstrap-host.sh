@@ -40,4 +40,4 @@ docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 -p 
 echo "JSON RPC credentials:"
 # Sleep to allow the node to generate the credentials and avoid the race...
 sleep 1
-docker run --volumes-from=bitcoind-data --rm -it kylemanna/bitcoind getconfig
+docker run --volumes-from=bitcoind-data --rm -it kylemanna/bitcoind cat /bitcoin/.bitcoin/bitcoin.conf
