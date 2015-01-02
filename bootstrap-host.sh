@@ -33,8 +33,10 @@ fi
 docker kill bitcoind-data bitcoind-node || true
 docker rm bitcoind-data bitcoind-node || true
 
-# Always pull to avoid caching issues
-docker pull $BTC_IMAGE
+# Always pull remote images to avoid caching issues
+if [ -z "${BTC_IMAGE##*/*}" ]; then
+    docker pull $BTC_IMAGE
+fi
 
 docker run --name=bitcoind-data busybox true
 docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE btc_init
