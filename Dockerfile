@@ -25,5 +25,8 @@ VOLUME ["/bitcoin"]
 
 EXPOSE 8332 8333
 
+WORKDIR /bitcoin
+
 # Default arguments, can be overriden
 CMD ["bitcoind"]
+
