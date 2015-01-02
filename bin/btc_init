@@ -4,5 +4,11 @@
 # will have the same credentials.
 if [ ! -e "$HOME/.bitcoin/bitcoin.conf" ]; then
     mkdir -p $HOME/.bitcoin
-    bitcoind 2>&1 | grep "^rpc" > $HOME/.bitcoin/bitcoin.conf
+
+    # Seed a random password for JSON RPC server
+    cat <<EOF > $HOME/.bitcoin/bitcoin.conf
+rpcuser=bitcoinrpc
+rpcpassword=$(dd if=/dev/urandom bs=33 count=1 status=none | base64)
+EOF
+
 fi
