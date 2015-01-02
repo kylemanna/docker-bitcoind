@@ -24,4 +24,4 @@ VOLUME ["/bitcoin"]
 EXPOSE 8332 8333
 
 # Default arguments, can be overriden
-CMD ["bitcoind", "-printtoconsole", "-disablewallet"]
+CMD ["bitcoind", "-printtoconsole"]
