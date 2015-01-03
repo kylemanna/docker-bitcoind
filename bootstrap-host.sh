@@ -15,10 +15,10 @@ memtotal=$(grep ^MemTotal /proc/meminfo | awk '{print int($2/1024) }')
 # Only do swap hack if needed
 #
 if [ $memtotal -lt 1024 -a $(swapon -s | wc -l) -lt 2 ]; then
-   fallocate -l 512M /swap
-   mkswap /swap
-   echo "/swap swap swap defaults 0 0" >> /etc/fstab
-   swapon -a
+    fallocate -l 512M /swap || dd if=/dev/zero of=/swap bs=1M count=512
+    mkswap /swap
+    grep -q "^/swap" /etc/fstab || echo "/swap swap swap defaults 0 0" >> /etc/fstab
+    swapon -a
 fi
 
 free -m
