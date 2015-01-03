@@ -4,32 +4,32 @@ torrent="http://gtf.org/garzik/bitcoin/bootstrap.dat.torrent"
 
 while test $# -gt 0
 do
-	case "$1" in
-		--gpg-check)
-			aria2c --no-conf --dir=$HOME http://gtf.org/garzik/bitcoin/bootstrap.txt
-			bootstrapTxtPath="$HOME/bootstrap.txt"
-			if [ ! -e "$bootstrapTxtPath" ]; then
-				echo "Couldn't download the bootstrap.txt file"
-			fi
+    case "$1" in
+        --gpg-check)
+            aria2c --no-conf --dir=$HOME http://gtf.org/garzik/bitcoin/bootstrap.txt
+            bootstrapTxtPath="$HOME/bootstrap.txt"
+            if [ ! -e "$bootstrapTxtPath" ]; then
+                echo "Couldn't download the bootstrap.txt file"
+            fi
             gpg --ignore-time-conflict --keyserver pgp.mit.edu --recv-keys 7ADCA079
             gpg --verify $bootstrapTxtPath
             if [ $? -ne 0 ]; then
-				echo "Couldn't verify bootstrap torrent's signature"
-				exit 1
+                echo "Couldn't verify bootstrap torrent's signature"
+                exit 1
             fi
 
             torrent=$(cat $bootstrapTxtPath | grep --color=never "magnet:")
             rm -f $bootstrapTxtPath
             if [ -z "$torrent" ]; then
-				echo "Couldn't find the bootstrap magnet link inside the bootstrap.txt file"
-				exit 1
+                echo "Couldn't find the bootstrap magnet link inside the bootstrap.txt file"
+                exit 1
             fi
-        ;;
+            ;;
         --custom-torrent)
-        	torrent=$2
-        ;;
-	esac
-	shift
+            torrent=$2
+            ;;
+    esac
+    shift
 done
 
 aria2c --dir=$HOME/.bitcoin --no-conf --file-allocation=none --follow-torrent=mem --listen-port=6881 --dht-listen-port=6882 --seed-time=0 --index-out=1=bootstrap.dat $torrent
