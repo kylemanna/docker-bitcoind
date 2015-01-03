@@ -1,5 +1,5 @@
-docker-bitcoind
-===============
+Bitcoind for Docker
+===================
 
 Docker image that runs a bitcoind node in a container for easy deployment.
 
@@ -7,11 +7,11 @@ Docker image that runs a bitcoind node in a container for easy deployment.
 Requirements
 ------------
 
-* Physical machine, cloud instance, or VPS that supports Docker (i.e. EC2, [Digital Ocean](https://bit.ly/dobitcoind), KVM or XEN based VMs) running Ubuntu 14.04 or later (not OpenVZ containers!)
+* Physical machine, cloud instance, or VPS that supports Docker (i.e. [Vultr](http://bit.ly/vultrbitcoind), [Digital Ocean](https://bit.ly/dobitcoind), KVM or XEN based VMs) running Ubuntu 14.04 or later (*not OpenVZ containers!*)
 * At least 40 GB to store the block chain files
-* At least 1GB RAM
+* At least 512 MB RAM + 1 GB swap file
 
-Tested on Digital Ocean's 1GB / 1 CPU / 30GB droplet.
+Recommended and tested on [Vultr 512 MB RAM/160 GB disk instance @ $5/mo](http://bit.ly/vultrbitcoind).  Vultr also *accepts Bitcoin payments*!
 
 
 Really Fast Quick Start
