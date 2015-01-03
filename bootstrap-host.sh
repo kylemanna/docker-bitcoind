@@ -42,7 +42,13 @@ docker run --name=bitcoind-data -v /bitcoin busybox chown 1000:1000 /bitcoin
 docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE btc_init
 #docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 -p 127.0.0.1:8332:8332 $BTC_IMAGE bitcoind -rpcallowip=*
 curl https://raw.githubusercontent.com/kylemanna/docker-bitcoind/master/upstart.init > /etc/init/docker-bitcoind.conf
+
+# Bootstrap via bittorrent
+docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE -p 6881:6881 -p 6882:6882 btc_bootstrap
+
+# Start bitcoind via upstart and docker
 start docker-bitcoind
 
-echo "JSON RPC credentials:"
+set +ex
+echo "Resulting bitcoin.conf:"
 docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE cat /bitcoin/.bitcoin/bitcoin.conf
