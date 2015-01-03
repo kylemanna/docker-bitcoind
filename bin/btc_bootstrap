@@ -32,5 +32,5 @@ do
 	shift
 done
 
-aria2c --dir=$HOME/.bitcoin --no-conf --follow-torrent=mem --listen-port=6881 --dht-listen-port=6882 --seed-time=0 --index-out=1=bootstrap.dat $torrent
+aria2c --dir=$HOME/.bitcoin --no-conf --file-allocation=none --follow-torrent=mem --listen-port=6881 --dht-listen-port=6882 --seed-time=0 --index-out=1=bootstrap.dat $torrent
 exit $?
