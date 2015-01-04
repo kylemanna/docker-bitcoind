@@ -44,7 +44,7 @@ docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE btc_init
 curl https://raw.githubusercontent.com/kylemanna/docker-bitcoind/master/upstart.init > /etc/init/docker-bitcoind.conf
 
 # Bootstrap via bittorrent
-docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE -p 6881:6881 -p 6882:6882 btc_bootstrap
+docker run --volumes-from=bitcoind-data --rm -p 6881:6881 -p 6882:6882 $BTC_IMAGE btc_bootstrap
 
 # Start bitcoind via upstart and docker
 start docker-bitcoind
