@@ -9,9 +9,9 @@ Requirements
 
 * Physical machine, cloud instance, or VPS that supports Docker (i.e. [Vultr](http://bit.ly/vultrbitcoind), [Digital Ocean](https://bit.ly/dobitcoind), KVM or XEN based VMs) running Ubuntu 14.04 or later (*not OpenVZ containers!*)
 * At least 40 GB to store the block chain files
-* At least 512 MB RAM + 1 GB swap file
+* At least 1 GB RAM + 2 GB swap file
 
-Recommended and tested on [Vultr 512 MB RAM/160 GB disk instance @ $5/mo](http://bit.ly/vultrbitcoind).  Vultr also *accepts Bitcoin payments*!
+Recommended and tested on [Vultr 1024 MB RAM/320 GB disk instance @ $8/mo](http://bit.ly/vultrbitcoind).  Vultr also *accepts Bitcoin payments*!  May run on the 512 MB instance, but took *forever* (1+ week) to initialize due to swap and disk thrashing.
 
 
 Really Fast Quick Start
