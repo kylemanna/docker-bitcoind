@@ -10,4 +10,5 @@ Downloading a significant portion of the Bitcoin blockchain over bittorrent save
 
 * `--gpg-check` will use the GPG signed magnet link instead of the torrent file
 * `--custom-torrent` followed by a path/URL to a torrent file or a magnet link will use it instead of default
+* `--force` will override the default behavior which avoids downloading the file if blockchain blocks have already been downloaded
 
