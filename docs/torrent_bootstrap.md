@@ -4,7 +4,7 @@ Downloading a significant portion of the Bitcoin blockchain over bittorrent save
 
 ## Example Invocation
 
-    docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE -p 6881:6881 -p 6882:6882 btc_bootstrap
+    docker run --volumes-from=bitcoind-data --rm -p 6881:6881 -p 6882:6882 kylemanna/bitcoind btc_bootstrap
 
 ## Optional Arguments
 
