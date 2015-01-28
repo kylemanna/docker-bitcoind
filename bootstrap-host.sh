@@ -26,7 +26,12 @@ free -m
 if [ "$distro" = "trusty" -o "$distro" = "ubuntu:14.04" ]; then
     curl https://get.docker.io/gpg | apt-key add -
     echo deb http://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list
-    apt-get update && apt-get install -y lxc-docker
+
+    # Handle other parallel cloud init scripts that may lock the package database
+    # TODO: Add timeout
+    while ! apt-get update; do sleep 10; done
+
+    while ! apt-get install -y lxc-docker; do sleep 10; done
 fi
 
 # Always clean-up, but fail successfully
