@@ -25,34 +25,28 @@ One liner for Ubuntu 14.04 LTS machines with JSON-RPC enabled on localhost and a
 Quick Start
 -----------
 
-1. Create a bitcoind-data volume to persist the bitcoind blockchain data, should exit immediately.  The bitcoind-data container will store the blockchain when the node container is remade later (software upgrade, reboot, etc):
+1. Create a `bitcoind-data` volume to persist the bitcoind blockchain data, should exit immediately.  The `bitcoind-data` container will store the blockchain when the node container is recreated (software upgrade, reboot, etc):
 
         docker run --name=bitcoind-data -v /bitcoin busybox chown 1000:1000 /bitcoin
-        docker run --volumes-from=bitcoind-data --rm -it kylemanna/bitcoind btc_init
+        docker run --volumes-from=bitcoind-data --name=bitcoind-node -d \
+            -p 8333:8333 \
+            -p 127.0.0.1:8332:8332 \
+            -p 6881:6881 \
+            -p 6882:6882 \
+            kylemanna/bitcoind
 
-2. Run a Bitcoin node and use the data volume:
-
-        docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 kylemanna/bitcoind
-
-3. Verify that the container is running:
+2. Verify that the container is running and waiting for bitcoind node to
+   catch up with network
 
         $ docker ps
-        CONTAINER ID        IMAGE                       COMMAND                CREATED             STATUS              PORTS                                              NAMES
-        b595e548bfa8        kylemanna/bitcoind:latest   "bitcoind -rpcallowi   6 minutes ago       Up 6 minutes        127.0.0.1:8332->8332/tcp, 0.0.0.0:8333->8333/tcp   bitcoind-node
+        CONTAINER ID        IMAGE                         COMMAND             CREATED             STATUS              PORTS                                                                                              NAMES
+        d0e1076b2dca        kylemanna/bitcoind:latest     "btc_oneshot"       2 seconds ago       Up 1 seconds        0.0.0.0:6881->6881/tcp, 0.0.0.0:6882->6882/tcp, 127.0.0.1:8332->8332/tcp, 0.0.0.0:8333->8333/tcp   bitcoind-node
 
-4. You can then access the daemon's output thanks to the [docker logs command]( https://docs.docker.com/reference/commandline/cli/#logs)
+3. You can then access the daemon's output thanks to the [docker logs command]( https://docs.docker.com/reference/commandline/cli/#logs)
 
         docker logs -f bitcoind-node
 
-5. Install optional init script for upstart provided @ `upstart.init`.
-
-
-Enable JSON-RPC
----------------
-
-The following Docker run line will create a container with JSON-RPC enabled and will only allow Docker host to access the JSON RPC port 8332.
-
-    $ docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 -p 127.0.0.1:8332:8332 kylemanna/bitcoind bitcoind -disablewallet -rpcallowip=*
+4. Install optional init script for upstart provided @ `upstart.init`.
 
 
 Documentation

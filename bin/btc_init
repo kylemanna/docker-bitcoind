@@ -19,4 +19,6 @@ EOF
 
 fi
 
+cat $HOME/.bitcoin/bitcoin.conf
+
 echo "Initialization completed successfully"

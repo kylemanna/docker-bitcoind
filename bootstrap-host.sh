@@ -30,23 +30,21 @@ if [ "$distro" = "trusty" -o "$distro" = "ubuntu:14.04" ]; then
 fi
 
 # Always clean-up, but fail successfully
-docker kill bitcoind-data bitcoind-node || true
-docker rm bitcoind-data bitcoind-node || true
+docker kill bitcoind-data bitcoind-node 2>/dev/null || true
+docker rm bitcoind-data bitcoind-node 2>/dev/null || true
+stop docker-bitcoind 2>/dev/null || true
 
 # Always pull remote images to avoid caching issues
 if [ -z "${BTC_IMAGE##*/*}" ]; then
     docker pull $BTC_IMAGE
 fi
 
+# Initialize the data container
 docker run --name=bitcoind-data -v /bitcoin busybox chown 1000:1000 /bitcoin
 docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE btc_init
-#docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 -p 127.0.0.1:8332:8332 $BTC_IMAGE bitcoind -rpcallowip=*
-curl https://raw.githubusercontent.com/kylemanna/docker-bitcoind/master/upstart.init > /etc/init/docker-bitcoind.conf
-
-# Bootstrap via bittorrent
-docker run --volumes-from=bitcoind-data --rm -p 6881:6881 -p 6882:6882 $BTC_IMAGE btc_bootstrap
 
 # Start bitcoind via upstart and docker
+curl https://raw.githubusercontent.com/kylemanna/docker-bitcoind/master/upstart.init > /etc/init/docker-bitcoind.conf
 start docker-bitcoind
 
 set +ex
