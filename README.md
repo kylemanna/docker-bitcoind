@@ -49,14 +49,6 @@ Quick Start
 4. Install optional init script for upstart provided @ `upstart.init`.
 
 
-Enable JSON-RPC
----------------
-
-The following Docker run line will create a container with JSON-RPC enabled and will only allow Docker host to access the JSON RPC port 8332.
-
-    $ docker run --volumes-from=bitcoind-data --name=bitcoind-node -d -p 8333:8333 -p 127.0.0.1:8332:8332 kylemanna/bitcoind bitcoind -disablewallet -rpcallowip=*
-
-
 Documentation
 -------------
 
