@@ -30,8 +30,9 @@ if [ "$distro" = "trusty" -o "$distro" = "ubuntu:14.04" ]; then
 fi
 
 # Always clean-up, but fail successfully
-docker kill bitcoind-data bitcoind-node || true
-docker rm bitcoind-data bitcoind-node || true
+docker kill bitcoind-data bitcoind-node 2>/dev/null || true
+docker rm bitcoind-data bitcoind-node 2>/dev/null || true
+stop docker-bitcoind 2>/dev/null || true
 
 # Always pull remote images to avoid caching issues
 if [ -z "${BTC_IMAGE##*/*}" ]; then
