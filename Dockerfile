@@ -27,5 +27,5 @@ EXPOSE 8332 8333 6881 6882
 
 WORKDIR /bitcoin
 
-CMD ["/usr/local/bin/entry.sh"]
+CMD ["btc_oneshot"]
 
