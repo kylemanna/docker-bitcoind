@@ -7,7 +7,7 @@ Docker image that runs a bitcoind node in a container for easy deployment.
 Requirements
 ------------
 
-* Physical machine, cloud instance, or VPS that supports Docker (i.e. [Vultr](http://bit.ly/vultrbitcoind), [Digital Ocean](https://bit.ly/dobitcoind), KVM or XEN based VMs) running Ubuntu 14.04 or later (*not OpenVZ containers!*)
+* Physical machine, cloud instance, or VPS that supports Docker (i.e. [Vultr](http://bit.ly/1HngXg0), [Digital Ocean](http://bit.ly/18AykdD), KVM or XEN based VMs) running Ubuntu 14.04 or later (*not OpenVZ containers!*)
 * At least 40 GB to store the block chain files
 * At least 1 GB RAM + 2 GB swap file
 
@@ -53,9 +53,3 @@ Documentation
 -------------
 
 * Additional documentation in the [docs folder](docs).
-
-
-Todo
-----
-
-- [ ] Review possiblity of bootstraping blockchain via BitTorrent
