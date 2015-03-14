@@ -46,7 +46,10 @@ fi
 
 # Initialize the data container
 docker run --name=bitcoind-data -v /bitcoin busybox chown 1000:1000 /bitcoin
+docker run --name=insight-data -v /insight busybox chown 1000:1000 /insight
 docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE btc_init
+docker run --volumes-from=bitcoind-data --volumes-from=insight-data --rm $BTC_IMAGE insight_init
+
 
 # Start bitcoind via upstart and docker
 curl https://raw.githubusercontent.com/kobigurk/docker-bitcoind/master/upstart.init > /etc/init/docker-bitcoind.conf
@@ -54,4 +57,4 @@ start docker-bitcoind
 
 set +ex
 echo "Resulting bitcoin.conf:"
-docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE cat /bitcoin/.bitcoin/bitcoin.conf
+docker run --volumes-from=bitcoind-data --volumes-from=insight-data --rm $BTC_IMAGE cat /bitcoin/.bitcoin/bitcoin.conf

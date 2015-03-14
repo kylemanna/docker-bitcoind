@@ -1,4 +1,4 @@
-Bitcoind for Docker
+Bitcoind with insight for Docker
 ===================
 
 Docker image that runs a bitcoind node and insight in a container for easy deployment.
@@ -28,11 +28,13 @@ Quick Start
 1. Create a `bitcoind-data` volume to persist the bitcoind blockchain data, should exit immediately.  The `bitcoind-data` container will store the blockchain when the node container is recreated (software upgrade, reboot, etc):
 
         docker run --name=bitcoind-data -v /bitcoin busybox chown 1000:1000 /bitcoin
-        docker run --volumes-from=bitcoind-data --name=bitcoind-node -d \
+        docker run --name=insight-data -v /insight busybox chown 1000:1000 /insight
+        docker run --volumes-from=bitcoind-data --volumes-from=insight-data --name=bitcoind-node -d \
             -p 8333:8333 \
             -p 127.0.0.1:8332:8332 \
             -p 6881:6881 \
             -p 6882:6882 \
+			-p 3001:3001
             kobigurk/bitcoind
 
 2. Verify that the container is running and waiting for bitcoind node to
@@ -47,6 +49,8 @@ Quick Start
         docker logs -f bitcoind-node
 
 4. Install optional init script for upstart provided @ `upstart.init`.
+
+5. To access insight frontend, go to http://localhost:3001
 
 
 Documentation

@@ -4,6 +4,7 @@ set -ex
 
 # Generate bitcoin.conf
 btc_init
+insight_init
 
 if [ ! -d /bitcoin/.bitcoin/blocks ]; then
     # Download via bittorrent file, fail quietly
@@ -13,7 +14,12 @@ fi
 if [ $# -gt 0 ]; then
     args=("$@")
 else
-    args=("-rpcallowip=*")
+    args=("-rpcallowip=::/0")
 fi
 
+export INSIGHT_NETWORK=livenet
+export BITCOIND_USER=bitcoinrpc
+export BITCOIND_PASS=$(cat $HOME/.bitcoin/bitcoin.conf | grep rpcpassword | awk '{split($0,a,"="); print a[2]}' | tr -d "\r" | tr -d "\n")
+cd /insight/insight
+exec npm start &
 exec bitcoind "${args[@]}"
