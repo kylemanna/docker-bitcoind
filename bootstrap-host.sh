@@ -4,7 +4,7 @@
 #
 set -ex
 
-BTC_IMAGE=${BTC_IMAGE:-kylemanna/bitcoind}
+BTC_IMAGE=${BTC_IMAGE:-kobigurk/bitcoind}
 
 distro=$1
 shift
@@ -49,7 +49,7 @@ docker run --name=bitcoind-data -v /bitcoin busybox chown 1000:1000 /bitcoin
 docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE btc_init
 
 # Start bitcoind via upstart and docker
-curl https://raw.githubusercontent.com/kylemanna/docker-bitcoind/master/upstart.init > /etc/init/docker-bitcoind.conf
+curl https://raw.githubusercontent.com/kobigurk/docker-bitcoind/master/upstart.init > /etc/init/docker-bitcoind.conf
 start docker-bitcoind
 
 set +ex
