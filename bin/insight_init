@@ -1,0 +1,7 @@
+#/bin/bash
+
+if [ ! -e /insight/insight ]; then
+	cd /insight
+	git clone https://github.com/bitpay/insight.git && cd insight
+	npm install
+fi
