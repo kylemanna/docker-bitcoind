@@ -29,12 +29,12 @@ Quick Start
 
         docker run --name=bitcoind-data -v /bitcoin busybox chown 1000:1000 /bitcoin
         docker run --name=insight-data -v /insight busybox chown 1000:1000 /insight
-        docker run --volumes-from=bitcoind-data --volumes-from=insight-data --name=bitcoind-node -d \
+        docker run --volumes-from=bitcoind-data --volumes-from=insight-data --name=bitcoind-insight-node -d \
             -p 8333:8333 \
             -p 127.0.0.1:8332:8332 \
             -p 6881:6881 \
             -p 6882:6882 \
-			-p 3001:3001
+			-p 3000:3000
             kobigurk/bitcoind
 
 2. Verify that the container is running and waiting for bitcoind node to
@@ -50,7 +50,7 @@ Quick Start
 
 4. Install optional init script for upstart provided @ `upstart.init`.
 
-5. To access insight frontend, go to http://localhost:3001
+5. To access insight frontend, go to http://localhost:3000.
 
 
 Documentation
