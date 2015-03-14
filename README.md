@@ -1,7 +1,7 @@
 Bitcoind for Docker
 ===================
 
-Docker image that runs a bitcoind node in a container for easy deployment.
+Docker image that runs a bitcoind node and insight in a container for easy deployment.
 
 
 Requirements
@@ -19,7 +19,7 @@ Really Fast Quick Start
 
 One liner for Ubuntu 14.04 LTS machines with JSON-RPC enabled on localhost and adds upstart init script:
 
-    curl https://raw.githubusercontent.com/kylemanna/docker-bitcoind/master/bootstrap-host.sh | sh -s trusty
+    curl https://raw.githubusercontent.com/kobigurk/docker-bitcoind/master/bootstrap-host.sh | sh -s trusty
 
 
 Quick Start
@@ -33,14 +33,14 @@ Quick Start
             -p 127.0.0.1:8332:8332 \
             -p 6881:6881 \
             -p 6882:6882 \
-            kylemanna/bitcoind
+            kobigurk/bitcoind
 
 2. Verify that the container is running and waiting for bitcoind node to
    catch up with network
 
         $ docker ps
         CONTAINER ID        IMAGE                         COMMAND             CREATED             STATUS              PORTS                                                                                              NAMES
-        d0e1076b2dca        kylemanna/bitcoind:latest     "btc_oneshot"       2 seconds ago       Up 1 seconds        0.0.0.0:6881->6881/tcp, 0.0.0.0:6882->6882/tcp, 127.0.0.1:8332->8332/tcp, 0.0.0.0:8333->8333/tcp   bitcoind-node
+        d0e1076b2dca        kobigurk/bitcoind:latest     "btc_oneshot"       2 seconds ago       Up 1 seconds        0.0.0.0:6881->6881/tcp, 0.0.0.0:6882->6882/tcp, 127.0.0.1:8332->8332/tcp, 0.0.0.0:8333->8333/tcp   bitcoind-node
 
 3. You can then access the daemon's output thanks to the [docker logs command]( https://docs.docker.com/reference/commandline/cli/#logs)
 
