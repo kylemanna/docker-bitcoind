@@ -1,24 +1,16 @@
 FROM ubuntu:14.04
-MAINTAINER Kobi Gurkan <kobigurk@gmail.com>
+MAINTAINER Kyle Manna <kyle@kylemanna.com>
 
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8842ce5e && \
     echo "deb http://ppa.launchpad.net/bitcoin/bitcoin/ubuntu trusty main" > /etc/apt/sources.list.d/bitcoin.list
 
-
 RUN apt-get update && \
-    apt-get install -y bitcoind aria2 git curl python build-essential
-
-RUN curl -sL https://deb.nodesource.com/setup | sudo bash -
-
-RUN apt-get install -y nodejs 
-
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    apt-get install -y bitcoind aria2 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV HOME /bitcoin
 RUN useradd -s /bin/bash -m -d /bitcoin bitcoin
 RUN chown bitcoin:bitcoin -R /bitcoin
-RUN mkdir /insight
-RUN chown bitcoin:bitcoin -R /insight
 
 ADD ./bin /usr/local/bin
 RUN chmod a+x /usr/local/bin/*
@@ -29,9 +21,9 @@ RUN chmod a+x /usr/local/bin/*
 # http://get.docker.io/ubuntu works fine also and seems simpler.
 USER bitcoin
 
-VOLUME ["/bitcoin", "/insight"]
+VOLUME ["/bitcoin"]
 
-EXPOSE 8332 8333 6881 6882 3000
+EXPOSE 8332 8333 6881 6882
 
 WORKDIR /bitcoin
 

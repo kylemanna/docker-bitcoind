@@ -1,7 +1,7 @@
-Bitcoind with insight for Docker
+Bitcoind and insight for Docker
 ===================
 
-Docker image that runs a bitcoind node and insight in a container for easy deployment.
+Docker image that runs a bitcoind node and insight in containers for easy deployment.
 
 
 Requirements
@@ -25,17 +25,24 @@ One liner for Ubuntu 14.04 LTS machines with JSON-RPC enabled on localhost and a
 Quick Start
 -----------
 
-1. Create a `bitcoind-data` volume to persist the bitcoind blockchain data, should exit immediately.  The `bitcoind-data` container will store the blockchain when the node container is recreated (software upgrade, reboot, etc):
+1. Create `bitcoind-data` and `insight-data` volumes to persist the bitcoind blockchain data and insight data, should exit immediately.  The containers will store the blockchain and insight data when the node container is recreated (software upgrade, reboot, etc):
 
         docker run --name=bitcoind-data -v /bitcoin busybox chown 1000:1000 /bitcoin
         docker run --name=insight-data -v /insight busybox chown 1000:1000 /insight
-        docker run --volumes-from=bitcoind-data --volumes-from=insight-data --name=bitcoind-insight-node -d \
+        docker-compose up
+
+        or run manually:
+        docker run --volumes-from=bitcoind-data --name=bitcoind-node -d \
             -p 8333:8333 \
             -p 127.0.0.1:8332:8332 \
             -p 6881:6881 \
             -p 6882:6882 \
 			-p 3000:3000
             kobigurk/bitcoind
+        docker run --volumes-from=bitcoind-data --volumes-from=insight-data --name=insight-node -d \
+			-p 3000:3000
+            kobigurk/bitcoind
+
 
 2. Verify that the container is running and waiting for bitcoind node to
    catch up with network
@@ -43,10 +50,14 @@ Quick Start
         $ docker ps
         CONTAINER ID        IMAGE                         COMMAND             CREATED             STATUS              PORTS                                                                                              NAMES
         d0e1076b2dca        kobigurk/bitcoind:latest     "btc_oneshot"       2 seconds ago       Up 1 seconds        0.0.0.0:6881->6881/tcp, 0.0.0.0:6882->6882/tcp, 127.0.0.1:8332->8332/tcp, 0.0.0.0:8333->8333/tcp   bitcoind-node
+        d0e1076b2dcb        kobigurk/insight:latest     "./start.sh"       2 seconds ago       Up 1 seconds        0.0.0.0:3000->3000/tcp   bitcoind-node
 
 3. You can then access the daemon's output thanks to the [docker logs command]( https://docs.docker.com/reference/commandline/cli/#logs)
 
         docker logs -f bitcoind-node
+        docker logs -f insight-node
+        or
+        docker-compose logs
 
 4. Install optional init script for upstart provided @ `upstart.init`.
 

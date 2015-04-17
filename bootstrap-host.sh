@@ -4,7 +4,8 @@
 #
 set -ex
 
-BTC_IMAGE=${BTC_IMAGE:-kobigurk/bitcoind}
+BTC_IMAGE=${BTC_IMAGE:-kylemanna/bitcoind}
+INSIGHT_IMAGE=${INSIGHT_IMAGE:-kobigurk/insight}
 
 distro=$1
 shift
@@ -44,11 +45,14 @@ if [ -z "${BTC_IMAGE##*/*}" ]; then
     docker pull $BTC_IMAGE
 fi
 
+if [ -z "${INSIGHT_IMAGE##*/*}" ]; then
+    docker pull $INSIGHT_IMAGE
+fi
+
 # Initialize the data container
 docker run --name=bitcoind-data -v /bitcoin busybox chown 1000:1000 /bitcoin
 docker run --name=insight-data -v /insight busybox chown 1000:1000 /insight
 docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE btc_init
-docker run --volumes-from=bitcoind-data --volumes-from=insight-data --rm $BTC_IMAGE insight_init
 
 
 # Start bitcoind via upstart and docker
@@ -57,4 +61,4 @@ start docker-bitcoind
 
 set +ex
 echo "Resulting bitcoin.conf:"
-docker run --volumes-from=bitcoind-data --volumes-from=insight-data --rm $BTC_IMAGE cat /bitcoin/.bitcoin/bitcoin.conf
+docker run --volumes-from=bitcoind-data --rm $BTC_IMAGE cat /bitcoin/.bitcoin/bitcoin.conf
