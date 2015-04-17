@@ -28,4 +28,3 @@ EXPOSE 8332 8333 6881 6882
 WORKDIR /bitcoin
 
 CMD ["btc_oneshot"]
-

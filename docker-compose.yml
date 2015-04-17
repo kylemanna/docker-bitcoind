@@ -1,0 +1,19 @@
+bitcoind:
+    build: .
+    ports:
+        - "8332:8332"
+        - "8333:8333"
+        - "6881:6881"
+        - "6882:6882"
+    volumes_from: 
+        - bitcoind-data
+
+insight:
+    build: ./insight
+    ports:
+        - "3000:3000"
+    volumes_from: 
+        - insight-data
+        - bitcoind-data
+    links:
+        - bitcoind
