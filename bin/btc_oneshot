@@ -13,7 +13,7 @@ fi
 if [ $# -gt 0 ]; then
     args=("$@")
 else
-    args=("-rpcallowip=*")
+    args=("-rpcallowip=::/0")
 fi
 
 exec bitcoind "${args[@]}"
