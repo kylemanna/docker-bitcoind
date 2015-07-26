@@ -20,7 +20,8 @@ RUN git clone https://github.com/bitcoin/bitcoin.git \
  && make \
  && make install
 
-VOLUME /bitcoin
+RUN MKDIR /bitcoin
+VOLUME /bitcoin/database
 
 EXPOSE 8333
 
