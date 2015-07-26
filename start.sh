@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-#bitcoind --daemon
-#which bitcoind
+bitcoind -datadir=/bitcoin
+which bitcoind

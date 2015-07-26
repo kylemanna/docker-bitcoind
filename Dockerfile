@@ -20,6 +20,8 @@ RUN git clone https://github.com/bitcoin/bitcoin.git \
  && make \
  && make install
 
+VOLUME /bitcoin
+
 EXPOSE 8333
 
 COPY start.sh /start.sh
