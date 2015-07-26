@@ -1,5 +1,5 @@
 FROM ubuntu:14.04
-MAINTAINER Kyle Manna <kyle@kylemanna.com>
+MAINTAINER Levin Keller <github@levinkeller.de>
 
 RUN apt-get update && \
     apt-get install git build-essential libtool autotools-dev autoconf pkg-config libssl-dev libboost-all-dev && \
