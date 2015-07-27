@@ -12,18 +12,20 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y \
  libboost-all-dev \
  bsdmainutils
 
-RUN git clone https://github.com/bitcoin/bitcoin.git \
- && cd bitcoin \
- && git checkout v0.11.0 \
- && ./autogen.sh \
- && ./configure --disable-wallet --without-gui \
- && make \
- && make install
+COPY start.sh /scripts/start.sh
+
+COPY buildAndInstallBitcoin.sh /scripts/buildAndInstallBitcoin.sh
+
+RUN /scripts/buildAndInstallBitcoin.sh
+
+ENV RPC_USER=user \
+    RPC_PASSWORD=password \
+    BITCOIN_PORT=8333 \
+    RPC_PORT=8332
 
 VOLUME /bitcoin/database
 
-EXPOSE 8333
+EXPOSE 8333 8332
 
-COPY start.sh /start.sh
-ENTRYPOINT ["/start.sh"]
+ENTRYPOINT ["/scripts/start.sh"]
 
