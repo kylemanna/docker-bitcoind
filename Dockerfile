@@ -25,5 +25,5 @@ VOLUME /bitcoin/database
 EXPOSE 8333
 
 COPY start.sh /start.sh
-CMD ["/start.sh"]
+ENTRYPOINT ["/start.sh"]
 
