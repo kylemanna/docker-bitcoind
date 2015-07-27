@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
-bitcoind -datadir=/bitcoin
-which bitcoind
+bitcoind -datadir=/bitcoin -rpcuser=$RPC_USER -rpcpassword=$RPC_PASS
