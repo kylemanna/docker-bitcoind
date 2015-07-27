@@ -23,7 +23,7 @@ ENV RPC_USER=user \
     BITCOIN_PORT=8333 \
     RPC_PORT=8332
 
-VOLUME /bitcoin/database
+VOLUME /bitcoin
 
 EXPOSE 8333 8332
 
