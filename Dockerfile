@@ -1,31 +1,30 @@
 FROM ubuntu:14.04
-MAINTAINER Kyle Manna <kyle@kylemanna.com>
+MAINTAINER Levin Keller <github@levinkeller.de>
 
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8842ce5e && \
-    echo "deb http://ppa.launchpad.net/bitcoin/bitcoin/ubuntu trusty main" > /etc/apt/sources.list.d/bitcoin.list
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
+ git \
+ build-essential \
+ libtool \
+ autotools-dev \
+ autoconf \
+ pkg-config \
+ libssl-dev \
+ libboost-all-dev \
+ bsdmainutils
 
-RUN apt-get update && \
-    apt-get install -y bitcoind aria2 && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+COPY start.sh /scripts/start.sh
 
-ENV HOME /bitcoin
-RUN useradd -s /bin/bash -m -d /bitcoin bitcoin
-RUN chown bitcoin:bitcoin -R /bitcoin
+COPY buildAndInstallBitcoin.sh /scripts/buildAndInstallBitcoin.sh
 
-ADD ./bin /usr/local/bin
-RUN chmod a+x /usr/local/bin/*
+RUN /scripts/buildAndInstallBitcoin.sh
 
-# For some reason, docker.io (0.9.1~dfsg1-2) pkg in Ubuntu 14.04 has permission
-# denied issues when executing /bin/bash from trusted builds.  Building locally
-# works fine (strange).  Using the upstream docker (0.11.1) pkg from
-# http://get.docker.io/ubuntu works fine also and seems simpler.
-USER bitcoin
+ENV RPC_USER=user \
+    RPC_PASSWORD=password \
+    RPC_PORT=8332
 
-VOLUME ["/bitcoin"]
+VOLUME /bitcoin
 
-EXPOSE 8332 8333 6881 6882
+EXPOSE 8333 8332
 
-WORKDIR /bitcoin
-
-CMD ["btc_oneshot"]
+ENTRYPOINT ["/scripts/start.sh"]
 
