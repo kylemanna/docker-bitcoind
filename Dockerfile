@@ -20,7 +20,6 @@ RUN /scripts/buildAndInstallBitcoin.sh
 
 ENV RPC_USER=user \
     RPC_PASSWORD=password \
-    BITCOIN_PORT=8333 \
     RPC_PORT=8332
 
 VOLUME /bitcoin
