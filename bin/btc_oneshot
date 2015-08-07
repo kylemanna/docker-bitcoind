@@ -5,11 +5,6 @@ set -ex
 # Generate bitcoin.conf
 btc_init
 
-if [ ! -d /bitcoin/.bitcoin/blocks ]; then
-    # Download via bittorrent file, fail quietly
-    btc_bootstrap || true
-fi
-
 if [ $# -gt 0 ]; then
     args=("$@")
 else

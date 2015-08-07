@@ -1,0 +1,31 @@
+[Unit]
+Description=Bitcoind Docker Container
+Documentation=https://github.com/kylemanna/docker-bitcoind
+After=network.target docker.socket
+Requires=docker.socket
+
+[Service]
+RestartSec=10
+Restart=always
+
+# Modify IP6_PREFIX to match network config
+Environment="NAME=bitcoind"
+Environment="DATA_VOL=bitcoind-data"
+Environment="IMG=kylemanna/bitcoind:dev"
+Environment="PORT=8333:8333/tcp"
+
+# To override environment variables, use local configuration directory:
+# /etc/systemd/system/docker-bitcoind.service/local.conf
+# http://www.freedesktop.org/software/systemd/man/systemd.unit.html
+
+# Clean-up bad state if still hanging around
+ExecStartPre=-/usr/bin/docker rm -f $NAME
+
+# Attempt to pull new image for security updates
+ExecStartPre=-/usr/bin/docker pull $IMG
+
+# Main process
+ExecStart=/usr/bin/docker run --rm --volumes-from ${DATA_VOL} --name ${NAME} -p ${PORT} ${IMG} btc_oneshot $ARGS
+
+[Install]
+WantedBy=multi-user.target
