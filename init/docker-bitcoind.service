@@ -25,7 +25,7 @@ ExecStartPre=-/usr/bin/docker rm -f $NAME
 ExecStartPre=-/usr/bin/docker pull $IMG
 
 # Main process
-ExecStart=/usr/bin/docker run --rm --volumes-from ${DATA_VOL} --name ${NAME} -p ${PORT} ${IMG} btc_oneshot $ARGS
+ExecStart=/usr/bin/docker run --rm -v ${DATA_VOL}:/bitcoin --name ${NAME} -p ${PORT} ${IMG} btc_oneshot $ARGS
 
 [Install]
 WantedBy=multi-user.target

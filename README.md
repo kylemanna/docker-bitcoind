@@ -27,8 +27,8 @@ Quick Start
 
 1. Create a `bitcoind-data` volume to persist the bitcoind blockchain data, should exit immediately.  The `bitcoind-data` container will store the blockchain when the node container is recreated (software upgrade, reboot, etc):
 
-        docker run --name=bitcoind-data -v /bitcoin busybox chown 1000:1000 /bitcoin
-        docker run --volumes-from=bitcoind-data --name=bitcoind-node -d \
+        docker volume create --name=bitcoind-data
+        docker run -v bitcoind-data:/bitcoin --name=bitcoind-node -d \
             -p 8333:8333 \
             -p 127.0.0.1:8332:8332 \
             kylemanna/bitcoind
