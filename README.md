@@ -6,7 +6,7 @@ Bitcoind for Docker
 [![ImageLayers Size](https://img.shields.io/imagelayers/image-size/kylemanna/bitcoind/latest.svg)](https://hub.docker.com/r/kylemanna/bitcoind/)
 [![ImageLayers Layers](https://img.shields.io/imagelayers/layers/kylemanna/bitcoind/latest.svg)](https://hub.docker.com/r/kylemanna/bitcoind/)
 
-Docker image that runs a bitcoind node in a container for easy deployment.
+Docker image that runs the Bitcoin bitcoind node in a container for easy deployment.
 
 
 Requirements
