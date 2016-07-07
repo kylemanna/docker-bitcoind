@@ -4,8 +4,8 @@ Bitcoind for Docker
 [![Docker Stars](https://img.shields.io/docker/stars/kylemanna/bitcoind.svg)](https://hub.docker.com/r/kylemanna/bitcoind/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/kylemanna/bitcoind.svg)](https://hub.docker.com/r/kylemanna/bitcoind/)
 [![Build Status](https://travis-ci.org/kylemanna/docker-bitcoind.svg)](https://travis-ci.org/kylemanna/docker-bitcoind/)
-[![ImageLayers Size](https://img.shields.io/imagelayers/image-size/kylemanna/bitcoind/latest.svg)](https://hub.docker.com/r/kylemanna/bitcoind/)
-[![ImageLayers Layers](https://img.shields.io/imagelayers/layers/kylemanna/bitcoind/latest.svg)](https://hub.docker.com/r/kylemanna/bitcoind/)
+[![ImageLayers](https://imagelayers.io/badge/kylemanna/bitcoind:latest.svg)](https://hub.docker.com/r/kylemanna/bitcoind/)
+
 
 Docker image that runs the Bitcoin bitcoind node in a container for easy deployment.
 
