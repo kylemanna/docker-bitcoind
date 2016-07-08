@@ -3,6 +3,7 @@ services: docker
 
 env:
   - VARIANT=trusty
+  - VARIANT=xenial
 
 install:
   - git clone https://github.com/docker-library/official-images.git ~/official-images
@@ -12,7 +13,7 @@ before_script:
   - image="bitcoind:$VARIANT"
 
 script:
-  - docker build -t "$image" .
+  - docker build -t "$image" "ubuntu/$VARIANT"
   - ~/official-images/test/run.sh "$image"
 
 after_script:
