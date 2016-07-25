@@ -3,7 +3,7 @@ Bitcoind for Docker
 
 [![Docker Stars](https://img.shields.io/docker/stars/kylemanna/bitcoind.svg)](https://hub.docker.com/r/kylemanna/bitcoind/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/kylemanna/bitcoind.svg)](https://hub.docker.com/r/kylemanna/bitcoind/)
-[![Build Status](https://travis-ci.org/kylemanna/docker-bitcoind.svg)](https://travis-ci.org/kylemanna/docker-bitcoind/)
+[![Build Status](https://travis-ci.org/kylemanna/docker-bitcoind.svg?branch=master)](https://travis-ci.org/kylemanna/docker-bitcoind/)
 [![ImageLayers](https://imagelayers.io/badge/kylemanna/bitcoind:latest.svg)](https://hub.docker.com/r/kylemanna/bitcoind/)
 
 
