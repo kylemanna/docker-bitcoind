@@ -14,7 +14,7 @@ if [ ! -e "$HOME/.bitcoin/bitcoin.conf" ]; then
 disablewallet=${DISABLEWALLET:-1}
 printtoconsole=${PRINTTOCONSOLE:-1}
 rpcuser=${RPCUSER:-bitcoinrpc}
-rpcpassword=${RPCPASSWORD:-dd if=/dev/urandom bs=33 count=1 status=none | base64}
+rpcpassword=${RPCPASSWORD:-`dd if=/dev/urandom bs=33 count=1 2>/dev/null | base64`}
 EOF
 
 fi
