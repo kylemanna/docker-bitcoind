@@ -2,7 +2,7 @@ language: bash
 services: docker
 
 env:
-  - VARIANT=trusty
+  - VARIANT=xenial
 
 install:
   - git clone https://github.com/docker-library/official-images.git official-images
