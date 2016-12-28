@@ -1,11 +1,11 @@
-FROM ubuntu:14.04
+FROM ubuntu:xenial
 MAINTAINER Kyle Manna <kyle@kylemanna.com>
 
 ARG USER_ID
 ARG GROUP_ID
 
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8842ce5e && \
-    echo "deb http://ppa.launchpad.net/bitcoin/bitcoin/ubuntu trusty main" > /etc/apt/sources.list.d/bitcoin.list
+    echo "deb http://ppa.launchpad.net/bitcoin/bitcoin/ubuntu xenial main" > /etc/apt/sources.list.d/bitcoin.list
 
 RUN apt-get update && \
     apt-get install -y bitcoind && \
