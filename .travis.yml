@@ -9,7 +9,7 @@ install:
 
 before_script:
   - env | sort
-  - image="bitcoind:$VARIANT"
+  - image="btcd:$VARIANT"
 
 script:
   - docker build -t "$image" .
