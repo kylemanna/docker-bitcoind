@@ -1,25 +1,39 @@
+FROM golang:1.10-stretch as builder
+
+MAINTAINER Tom Kirkpatrick <tkp@kirkdesigns.co.uk>
+
+# Install build dependencies such as git and glide.
+RUN go get -u github.com/Masterminds/glide
+
+WORKDIR $GOPATH/src/github.com/btcsuite/btcd
+
+# Grab and install the latest version of btcd and all related dependencies.
+RUN git clone https://github.com/btcsuite/btcd . \
+&&  glide install \
+&&  go install . ./cmd/...
+
 FROM ubuntu:xenial
-MAINTAINER Kyle Manna <kyle@kylemanna.com>
+MAINTAINER Tom Kirkpatrick <tkp@kirkdesigns.co.uk>
 
 ARG USER_ID
 ARG GROUP_ID
 
-ENV HOME /bitcoin
+ENV HOME /btcd
 
 # add user with specified (or default) user/group ids
 ENV USER_ID ${USER_ID:-1000}
 ENV GROUP_ID ${GROUP_ID:-1000}
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
-RUN groupadd -g ${GROUP_ID} bitcoin \
-	&& useradd -u ${USER_ID} -g bitcoin -s /bin/bash -m -d /bitcoin bitcoin
+RUN groupadd -g ${GROUP_ID} btcd \
+	&& useradd -u ${USER_ID} -g btcd -s /bin/bash -m -d /btcd btcd
 
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C70EF1F0305A1ADB9986DBD8D46F45428842CE5E && \
-    echo "deb http://ppa.launchpad.net/bitcoin/bitcoin/ubuntu xenial main" > /etc/apt/sources.list.d/bitcoin.list
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-		bitcoind \
-	&& apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# Copy the compiled binaries from the builder image.
+COPY --from=builder /go/bin/addblock /bin/
+COPY --from=builder /go/bin/btcctl /bin/
+COPY --from=builder /go/bin/btcd /bin/
+COPY --from=builder /go/bin/findcheckpoint /bin/
+COPY --from=builder /go/bin/gencerts /bin/
 
 # grab gosu for easy step-down from root
 ENV GOSU_VERSION 1.7
@@ -42,11 +56,21 @@ RUN set -x \
 
 ADD ./bin /usr/local/bin
 
-VOLUME ["/bitcoin"]
+VOLUME ["/btcd"]
 
-EXPOSE 8332 8333 18332 18333
+# Expose mainnet ports (server, rpc)
+EXPOSE 8333 8334
 
-WORKDIR /bitcoin
+# Expose testnet ports (server, rpc)
+EXPOSE 18333 18334
+
+# Expose simnet ports (server, rpc)
+EXPOSE 18555 18556
+
+# Expose segnet ports (server, rpc)
+EXPOSE 28901 28902
+
+WORKDIR /btcd
 
 COPY docker-entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["docker-entrypoint.sh"]

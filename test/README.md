@@ -4,8 +4,8 @@ Philosophy is to not re-invent the wheel while allowing users to quickly test re
 
 Example invocation from top-level of repository:
 
-    docker build -t bitcoind .
-    tests/run.sh bitcoind
+    docker build -t btcd .
+    tests/run.sh btcd
 
 More details: https://github.com/docker-library/official-images/tree/master/test
 

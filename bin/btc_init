@@ -4,21 +4,19 @@ set -ex
 
 # This shouldn't be in the Dockerfile or containers built from the same image
 # will have the same credentials.
-if [ ! -e "$HOME/.bitcoin/bitcoin.conf" ]; then
-    mkdir -p $HOME/.bitcoin
+if [ ! -e "$HOME/.btcd/btcd.conf" ]; then
+    mkdir -p $HOME/.btcd
 
-    echo "Creating bitcoin.conf"
+    echo "Creating btcd.conf"
 
     # Seed a random password for JSON RPC server
-    cat <<EOF > $HOME/.bitcoin/bitcoin.conf
-disablewallet=${DISABLEWALLET:-1}
-printtoconsole=${PRINTTOCONSOLE:-1}
-rpcuser=${RPCUSER:-bitcoinrpc}
-rpcpassword=${RPCPASSWORD:-`dd if=/dev/urandom bs=33 count=1 2>/dev/null | base64`}
+    cat <<EOF > $HOME/.btcd/btcd.conf
+rpcuser=${RPCUSER:-btcdrpc}
+rpcpass=${RPCPASS:-`dd if=/dev/urandom bs=33 count=1 2>/dev/null | base64`}
 EOF
 
 fi
 
-cat $HOME/.bitcoin/bitcoin.conf
+cat $HOME/.btcd/btcd.conf
 
 echo "Initialization completed successfully"

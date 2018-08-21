@@ -4,7 +4,7 @@
 #
 set -ex
 
-BTC_IMAGE=${BTC_IMAGE:-kylemanna/bitcoind}
+BTC_IMAGE=${BTC_IMAGE:-lnzap/btcd}
 
 distro=$1
 shift
@@ -35,9 +35,9 @@ if [ "$distro" = "trusty" -o "$distro" = "ubuntu:14.04" ]; then
 fi
 
 # Always clean-up, but fail successfully
-docker kill bitcoind-node 2>/dev/null || true
-docker rm bitcoind-node 2>/dev/null || true
-stop docker-bitcoind 2>/dev/null || true
+docker kill btcd-node 2>/dev/null || true
+docker rm btcd-node 2>/dev/null || true
+stop docker-btcd 2>/dev/null || true
 
 # Always pull remote images to avoid caching issues
 if [ -z "${BTC_IMAGE##*/*}" ]; then
@@ -45,13 +45,13 @@ if [ -z "${BTC_IMAGE##*/*}" ]; then
 fi
 
 # Initialize the data container
-docker volume create --name=bitcoind-data
-docker run -v bitcoind-data:/bitcoin --rm $BTC_IMAGE btc_init
+docker volume create --name=btcd-data
+docker run -v btcd-data:/btcd --rm $BTC_IMAGE btc_init
 
-# Start bitcoind via upstart and docker
-curl https://raw.githubusercontent.com/kylemanna/docker-bitcoind/master/upstart.init > /etc/init/docker-bitcoind.conf
-start docker-bitcoind
+# Start btcd via upstart and docker
+curl https://raw.githubusercontent.com/LN-Zap/docker-btcd/master/upstart.init > /etc/init/docker-btcd.conf
+start docker-btcd
 
 set +ex
-echo "Resulting bitcoin.conf:"
-docker run -v bitcoind-data:/bitcoin --rm $BTC_IMAGE cat /bitcoin/.bitcoin/bitcoin.conf
+echo "Resulting btcd.conf:"
+docker run -v btcd-data:/btcd --rm $BTC_IMAGE cat /btcd/.btcd/btcd.conf
