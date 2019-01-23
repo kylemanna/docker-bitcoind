@@ -1,8 +1,8 @@
 [Unit]
 Description=Bitcoind Docker Container
 Documentation=https://github.com/kylemanna/docker-bitcoind
-After=network.target docker.socket
-Requires=docker.socket
+Requires=docker.service
+After=docker.service
 
 [Service]
 RestartSec=10
