@@ -1,20 +1,8 @@
 # Smallest base image, latests stable image
 # Alpine would be nice, but it's linked again musl and breaks the bitcoin core download binary
 #FROM alpine:latest
-FROM ubuntu:latest
 
-LABEL maintainer="Kyle Manna <kyle@kylemanna.com>"
-
-EXPOSE 8332 8333
-VOLUME ["/bitcoin"]
-
-ENTRYPOINT ["docker-entrypoint.sh"]
-ENV HOME /bitcoin
-
-ARG GROUP_ID=1000
-ARG USER_ID=1000
-RUN groupadd -g ${GROUP_ID} bitcoin \
-    && useradd -u ${USER_ID} -g bitcoin -d /bitcoin bitcoin
+FROM ubuntu:latest as builder
 
 # Testing: gosu
 #RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
@@ -22,7 +10,6 @@ RUN groupadd -g ${GROUP_ID} bitcoin \
 RUN apt update \
     && apt install -y --no-install-recommends \
         ca-certificates \
-        gosu \
         wget \
         gnupg \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -45,9 +32,30 @@ RUN cd /tmp \
     && sha256sum -c SHA25SUM \
     && tar -xzvf bitcoin-${VERSION}-${ARCH}-linux-gnu.tar.gz -C /opt \
     && ln -sv bitcoin-${VERSION} /opt/bitcoin \
+    && /opt/bitcoin/bin/test_bitcoin --show_progress \
+    && rm -v /opt/bitcoin/bin/test_bitcoin /opt/bitcoin/bin/bitcoin-qt
+
+FROM ubuntu:latest
+LABEL maintainer="Kyle Manna <kyle@kylemanna.com>"
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+ENV HOME /bitcoin
+EXPOSE 8332 8333
+VOLUME ["/bitcoin/.bitcoin"]
+WORKDIR /bitcoin
+
+ARG GROUP_ID=1000
+ARG USER_ID=1000
+RUN groupadd -g ${GROUP_ID} bitcoin \
+    && useradd -u ${USER_ID} -g bitcoin -d /bitcoin bitcoin
+
+COPY --from=builder /opt/ /opt/
+
+RUN apt update \
+    && apt install -y --no-install-recommends gosu \
+    && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && ln -sv /opt/bitcoin/bin/* /usr/local/bin
 
-ADD ./bin docker-entrypoint.sh /usr/local/bin/
+COPY ./bin ./docker-entrypoint.sh /usr/local/bin/
 
-WORKDIR /bitcoin
 CMD ["btc_oneshot"]
