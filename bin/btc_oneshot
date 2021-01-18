@@ -6,10 +6,11 @@ set -ex
 btc_init
 
 # Default / no argument invocation listens for RPC commands and has to accept non-localhost because of
-# Docker port proxying or Docker private networking.  Also enable IPv6 which is only useful if using host
-# networking until Docker improves its IPv6 support.
+# Docker port proxying or Docker private networking.
 if [ $# -eq 0 ]; then
-    set -- '-rpcbind=[::]:8332' '-rpcallowip=::/0' '-rpcallowip=0.0.0.0/0'
+    # If IPv6 is in the container do both:
+    #set -- '-rpcbind=[::]:8332' '-rpcallowip=::/0' '-rpcallowip=0.0.0.0/0'
+    set -- '-rpcbind=:8332' '-rpcallowip=0.0.0.0/0'
 fi
 
 exec bitcoind "$@"
