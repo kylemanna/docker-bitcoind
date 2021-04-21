@@ -4,21 +4,60 @@ set -ex
 
 # This shouldn't be in the Dockerfile or containers built from the same image
 # will have the same credentials.
+
+CONFIG_PATH=$HOME/.bitcoin/bitcoin.conf
+
 if [ ! -e "$HOME/.bitcoin/bitcoin.conf" ]; then
     mkdir -p $HOME/.bitcoin
+fi
 
+
+if [[ "$CONFIG_FROM_ENV" == "true" ]]; then
+    echo "Creating bitcoin.conf"
+
+    eval "VAR=\$TESTNET"
+    export TESTNET=${VAR:-"0"}
+    eval "VAR=\$REGTEST"
+    export REGTEST=${VAR:-"0"}
+
+    echo "Removing old config to generate new from env variables"
+    rm -rf $CONFIG_PATH
+    touch $CONFIG_PATH
+
+    CONF_PREFIX=""
+
+    if [[ "$TESTNET" == "1" ]]; then
+        CONF_PREFIX="test."
+        echo "testnet=1" >> $CONFIG_PATH
+    elif [[ "$REGTEST" == "1" ]]; then
+        CONF_PREFIX="regtest."
+        echo "regtest=1" >> $CONFIG_PATH
+    fi
+
+    for name in VERSION ALERTNOTIFY BLOCKNOTIFY ASSUMEVALID CONF DATADIR DBCACHE LOADBLOCK MAXORPHANTX MAXMEMPOOL MEMPOOLEXPIRY BLOCKRECONSTRUCTIONEXTRATXN PAR PID PRUNE REINDEX REINDEX SYSPERMS TXINDEX ADDNODE BANSCORE BANTIME BIND CONNECT DISCOVER DNS DNSSEED EXTERNALIP FORCEDNSSEED LISTEN LISTENONION MAXCONNECTIONS MAXRECEIVEBUFFER MAXSENDBUFFER MAXTIMEADJUSTMENT ONION ONLYNET PERMITBAREMULTISIG PEERBLOOMFILTERS PORT PROXY PROXYRANDOMIZE RPCSERIALVERSION SEEDNODE TIMEOUT TORCONTROL TORPASSWORD UPNP WHITEBIND WHITELIST WHITELISTRELAY WHITELISTFORCERELAY MAXUPLOADTARGET DISABLEWALLET KEYPOOL FALLBACKFEE MINTXFEE PAYTXFEE RESCAN SALVAGEWALLET SPENDZEROCONFCHANGE TXCONFIRMTARGET USEHD WALLETRBF UPGRADEWALLET WALLET WALLETBROADCAST WALLETNOTIFY ZAPWALLETTXES ZMQPUBHASHBLOCK ZMQPUBHASHTX ZMQPUBRAWBLOCK ZMQPUBRAWTX UACOMMENT DEBUG HELP LOGIPS LOGTIMESTAMPS MINRELAYTXFEE MAXTXFEE PRINTTOCONSOLE SHRINKDEBUGFILE BYTESPERSIGOP DATACARRIER DATACARRIERSIZE MEMPOOLREPLACEMENT BLOCKMAXWEIGHT BLOCKMAXSIZE BLOCKPRIORITYSIZE BLOCKMINTXFEE SERVER REST RPCBIND RPCCOOKIEFILE RPCUSER RPCPASSWORD RPCAUTH RPCPORT RPCALLOWIP RPCTHREADS; do
+        eval "VAR=\$${name}"
+        if [[ "$name" == "PRUNE" ]]; then
+            VAR="${VAR:-0}"
+        fi
+        if [[ "$name" == "DISABLEWALLET" ]]; then
+            VAR="${VAR:-1}"
+        fi
+        if [[ "$name" == "PRINTTOCONSOLE" ]]; then
+            VAR="${VAR:-1}"
+        fi
+        [[ -n "$VAR" ]] && echo "${CONF_PREFIX}${name,,}=${VAR}" >> $CONFIG_PATH
+    done
+elif [ ! -e "$HOME/.bitcoin/bitcoin.conf" ]; then
     echo "Creating bitcoin.conf"
 
     # Seed a random password for JSON RPC server
-    cat <<EOF > $HOME/.bitcoin/bitcoin.conf
+    cat <<EOF > $CONFIG_PATH
 disablewallet=${DISABLEWALLET:-1}
 printtoconsole=${PRINTTOCONSOLE:-1}
 rpcuser=${RPCUSER:-bitcoinrpc}
 rpcpassword=${RPCPASSWORD:-`dd if=/dev/urandom bs=33 count=1 2>/dev/null | base64`}
 EOF
-
 fi
 
-cat $HOME/.bitcoin/bitcoin.conf
-
+cat $CONFIG_PATH
 echo "Initialization completed successfully"
