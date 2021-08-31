@@ -7,12 +7,12 @@ FROM ubuntu:latest as builder
 # Testing: gosu
 #RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
 #    && apk add --update --no-cache gnupg gosu gcompat libgcc
-RUN apt update \
-    && apt install -y --no-install-recommends \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
         ca-certificates \
         wget \
         gnupg \
-    && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ARG VERSION=0.21.1
 ARG ARCH=x86_64
@@ -38,24 +38,24 @@ RUN cd /tmp \
 FROM ubuntu:latest
 LABEL maintainer="Kyle Manna <kyle@kylemanna.com>"
 
-ENTRYPOINT ["docker-entrypoint.sh"]
 ENV HOME /bitcoin
-EXPOSE 8332 8333
-VOLUME ["/bitcoin/.bitcoin"]
-WORKDIR /bitcoin
-
 ARG GROUP_ID=1000
 ARG USER_ID=1000
-RUN groupadd -g ${GROUP_ID} bitcoin \
-    && useradd -u ${USER_ID} -g bitcoin -d /bitcoin bitcoin
+
+WORKDIR /bitcoin
 
 COPY --from=builder /opt/ /opt/
 
-RUN apt update \
-    && apt install -y --no-install-recommends gosu \
-    && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+RUN groupadd -g ${GROUP_ID} bitcoin \
+    && useradd -l -u ${USER_ID} -g bitcoin -d /bitcoin bitcoin \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends gosu \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && ln -sv /opt/bitcoin/bin/* /usr/local/bin
 
-COPY ./bin ./docker-entrypoint.sh /usr/local/bin/
+COPY ./btc_oneshot ./docker-entrypoint.sh /usr/local/bin/
 
+EXPOSE 8332 8333
+VOLUME ["/bitcoin/.bitcoin"]
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["btc_oneshot"]
