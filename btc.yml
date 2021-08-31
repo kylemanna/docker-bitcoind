@@ -1,0 +1,40 @@
+version: "3.4"
+services:
+  bitcoind:
+    restart: "${RESTART}"
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        - VERSION=${BTCD_VERSION}
+        - BITCOIN_CORE_SIGNATURE=${BTCD_SIGNATURE}
+        - GROUP_ID=10000
+        - USER_ID=10000
+    image: bitcoind:local
+    environment:
+        - DISABLEWALLET=1
+        - PRINTTOCONSOLE=1
+        - RPCUSER=${RPC_USER}
+        - RPCPASSWORD=${RPC_PW}
+    stop_grace_period: 1m
+    volumes:
+      - bitcoind-data:/bitcoin/.bitcoin
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 8333:8333/tcp
+    expose:
+      - 8332/tcp
+    entrypoint:
+      - docker-entrypoint.sh
+    command:
+      - btc_oneshot
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.btc.entrypoints=websecure
+      - traefik.http.routers.btc.rule=Host(`${BTC_HOST}.${DOMAIN}`)
+      - traefik.http.routers.btc.service=btc
+      - traefik.http.services.btc.loadbalancer.server.port=8332
+
+volumes:
+  bitcoind-data:

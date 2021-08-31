@@ -1,0 +1,5 @@
+version: "3.4"
+services:
+  bitcoind:
+    ports:
+      - 127.0.0.1:8332:8332/tcp
