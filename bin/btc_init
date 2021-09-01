@@ -13,6 +13,7 @@ if [ ! -e "$HOME/.bitcoin/bitcoin.conf" ]; then
     cat <<EOF > $HOME/.bitcoin/bitcoin.conf
 disablewallet=${DISABLEWALLET:-1}
 printtoconsole=${PRINTTOCONSOLE:-1}
+txindex=${TXINDEX:-0}
 rpcuser=${RPCUSER:-bitcoinrpc}
 rpcpassword=${RPCPASSWORD:-`dd if=/dev/urandom bs=33 count=1 2>/dev/null | base64`}
 EOF

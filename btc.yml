@@ -14,6 +14,7 @@ services:
     environment:
         - DISABLEWALLET=1
         - PRINTTOCONSOLE=1
+        - TXINDEX=1
         - RPCUSER=${RPC_USER}
         - RPCPASSWORD=${RPC_PW}
     stop_grace_period: 1m
