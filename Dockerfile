@@ -56,6 +56,6 @@ RUN groupadd -g ${GROUP_ID} bitcoin \
 COPY ./btc_oneshot ./docker-entrypoint.sh /usr/local/bin/
 
 EXPOSE 8332 8333
-VOLUME ["/bitcoin/.bitcoin"]
+# VOLUME ["/bitcoin/.bitcoin"]
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["btc_oneshot"]
