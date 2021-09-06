@@ -5,20 +5,21 @@ set -ex
 btc_init() {
     # This shouldn't be in the Dockerfile or containers built from the same image
     # will have the same credentials.
-    if [ ! -e "$HOME/.bitcoin/bitcoin.conf" ]; then
+
+    # https://github.com/bitcoin/bitcoin/blob/master/share/rpcauth/rpcauth.py
+
+    conf_bitcoin="$HOME/.bitcoin/bitcoin.conf"
+    if [ ! -e "$conf_bitcoin" ]; then
         mkdir -p "$HOME"/.bitcoin
-
         echo "Creating bitcoin.conf"
-
         # Seed a random password for JSON RPC server
-        cat <<EOF >"$HOME"/.bitcoin/bitcoin.conf
+        cat >"$conf_bitcoin" <<EOF
 disablewallet=${DISABLEWALLET:-1}
 printtoconsole=${PRINTTOCONSOLE:-1}
 rpcuser=${RPCUSER:-bitcoinrpc}
 rpcpassword=${RPCPASSWORD:-$(dd if=/dev/urandom bs=33 count=1 2>/dev/null | base64)}
 EOF
-
-        cat "$HOME"/.bitcoin/bitcoin.conf
+        cat "$conf_bitcoin"
         echo "Initialization completed successfully"
     fi
 }
