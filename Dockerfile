@@ -14,9 +14,9 @@ RUN apt update \
         gnupg \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ARG VERSION=0.21.1
+ARG VERSION=22.0
 ARG ARCH=x86_64
-ARG BITCOIN_CORE_SIGNATURE=01EA5486DE18A882D4C2684590C8019E36C2E964
+ARG BITCOIN_CORE_SIGNATURE=71A3B16735405025D447E8F274810B012346C9A6
 
 # Don't use base image's bitcoin package for a few reasons:
 # 1. Would need to use ppa/latest repo for the latest release.
@@ -24,12 +24,12 @@ ARG BITCOIN_CORE_SIGNATURE=01EA5486DE18A882D4C2684590C8019E36C2E964
 # 3. Verifying pkg signature from main website should inspire confidence and reduce chance of surprises.
 # Instead fetch, verify, and extract to Docker image
 RUN cd /tmp \
-    && wget https://bitcoincore.org/bin/bitcoin-core-${VERSION}/SHA256SUMS.asc \
     && gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys ${BITCOIN_CORE_SIGNATURE} \
-    && gpg --verify SHA256SUMS.asc \
-    && grep bitcoin-${VERSION}-${ARCH}-linux-gnu.tar.gz SHA256SUMS.asc > SHA25SUM \
-    && wget https://bitcoincore.org/bin/bitcoin-core-${VERSION}/bitcoin-${VERSION}-${ARCH}-linux-gnu.tar.gz \
-    && sha256sum -c SHA25SUM \
+    && wget https://bitcoincore.org/bin/bitcoin-core-${VERSION}/SHA256SUMS.asc \
+        https://bitcoincore.org/bin/bitcoin-core-${VERSION}/SHA256SUMS \
+        https://bitcoincore.org/bin/bitcoin-core-${VERSION}/bitcoin-${VERSION}-${ARCH}-linux-gnu.tar.gz \
+    && gpg --verify --status-fd 1 --verify SHA256SUMS.asc SHA256SUMS 2>/dev/null | grep "^\[GNUPG:\] VALIDSIG.*${BITCOIN_CORE_SIGNATURE}\$" \
+    && sha256sum --ignore-missing --check SHA256SUMS \
     && tar -xzvf bitcoin-${VERSION}-${ARCH}-linux-gnu.tar.gz -C /opt \
     && ln -sv bitcoin-${VERSION} /opt/bitcoin \
     && /opt/bitcoin/bin/test_bitcoin --show_progress \
