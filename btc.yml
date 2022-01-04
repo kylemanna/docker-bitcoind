@@ -42,11 +42,11 @@ services:
       - traefik.http.routers.btc.entrypoints=websecure
       - traefik.http.routers.btc.rule=Host(`${BTC_HOST}.${DOMAIN}`)
       - traefik.http.routers.btc.service=btc
-      - traefik.http.routers.btc.certresolver=letsencrypt
+      - traefik.http.routers.btc.tls.certresolver=letsencrypt
       - traefik.http.routers.btclb.entrypoints=websecure
       - traefik.http.routers.btclb.rule=Host(`${BTC_LB}.${DOMAIN}`)
       - traefik.http.routers.btclb.service=btc
-      - traefik.http.routers.btclb.certresolver=letsencrypt
+      - traefik.http.routers.btclb.tls.certresolver=letsencrypt
       - traefik.http.services.btc.loadbalancer.server.port=8332
 
 volumes:
