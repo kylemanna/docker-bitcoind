@@ -32,8 +32,8 @@ ENV KEYS2 637DB1E23370F84AFF88CCE03152347D07DA627C 82921A4B88FD454B7EB8CE3C796C4
 RUN cd /tmp \
     && wget https://bitcoincore.org/bin/bitcoin-core-${VERSION}/SHA256SUMS.asc \
     && wget https://bitcoincore.org/bin/bitcoin-core-${VERSION}/SHA256SUMS \
-    && timeout 32s gpg  --keyserver keyserver.ubuntu.com  --recv-keys $KEYS1 \
-    && timeout 32s gpg  --keyserver keys.openpgp.org  --recv-keys $KEYS2 \
+    && timeout 32s gpg  --keyserver keyserver.ubuntu.com --recv-keys $KEYS1 \
+    && timeout 32s gpg  --keyserver keys.openpgp.org --recv-keys $KEYS2 \
     && gpg --list-keys | tail -n +3 | tee /tmp/keys.txt \
     && gpg --list-keys $KEYS | diff - /tmp/keys.txt \
     && gpg --verify SHA256SUMS.asc SHA256SUMS \

@@ -1,4 +1,11 @@
 version: "3.4"
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 20m
+      max-file: "3"
+
 services:
   bitcoind:
     restart: "${RESTART}"
@@ -25,6 +32,7 @@ services:
       - 8333:8333/tcp
     expose:
       - 8332/tcp
+    <<: *logging
     entrypoint:
       - docker-entrypoint.sh
     command:
@@ -34,9 +42,11 @@ services:
       - traefik.http.routers.btc.entrypoints=websecure
       - traefik.http.routers.btc.rule=Host(`${BTC_HOST}.${DOMAIN}`)
       - traefik.http.routers.btc.service=btc
+      - traefik.http.routers.btc.certresolver=letsencrypt
       - traefik.http.routers.btclb.entrypoints=websecure
       - traefik.http.routers.btclb.rule=Host(`${BTC_LB}.${DOMAIN}`)
       - traefik.http.routers.btclb.service=btc
+      - traefik.http.routers.btclb.certresolver=letsencrypt
       - traefik.http.services.btc.loadbalancer.server.port=8332
 
 volumes:
