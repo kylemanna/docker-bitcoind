@@ -23,7 +23,6 @@ ENV KEYS1 71A3B16735405025D447E8F274810B012346C9A6 01EA5486DE18A882D4C2684590C80
 # keys to fetch from keys.openpgp.org
 ENV KEYS2 637DB1E23370F84AFF88CCE03152347D07DA627C 82921A4B88FD454B7EB8CE3C796C4109063D4EAF
 
-
 # Don't use base image's bitcoin package for a few reasons:
 # 1. Would need to use ppa/latest repo for the latest release.
 # 2. Some package generates /etc/bitcoin.conf on install and that's dangerous to bake in with Docker Hub.
