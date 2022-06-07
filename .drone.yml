@@ -1,0 +1,188 @@
+---
+kind: pipeline
+name: docker-bitcoind
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: publish-on-develop-bitcoind
+  image: plugins/docker
+  settings:
+    daemon_off: true
+    dockerfile: Dockerfile
+    password:
+      from_secret: docker-password
+    registry: registry.cn-hongkong.aliyuncs.com
+    repo: registry.cn-hongkong.aliyuncs.com/imtoken/bitcoind
+    tags:
+    - ${DRONE_COMMIT_SHA:0:8}
+    - develop
+    username:
+      from_secret: docker-username
+  when:
+    branch:
+    - hotfix/*
+    - feature/*
+    - support/*
+
+- name: publish-on-release-bitcoind
+  image: plugins/docker
+  settings:
+    daemon_off: true
+    dockerfile: Dockerfile
+    password:
+      from_secret: docker-password
+    registry: registry.cn-hongkong.aliyuncs.com
+    repo: registry.cn-hongkong.aliyuncs.com/imtoken/bitcoind
+    tags:
+    - ${DRONE_COMMIT_SHA:0:8}
+    - staging
+    username:
+      from_secret: docker-username
+  when:
+    branch:
+    - release/*
+
+- name: publish-on-stable-branch-bitcoind
+  image: plugins/docker
+  settings:
+    daemon_off: true
+    dockerfile: Dockerfile
+    password:
+      from_secret: docker-password
+    registry: registry.cn-hongkong.aliyuncs.com
+    repo: registry.cn-hongkong.aliyuncs.com/imtoken/bitcoind
+    tags:
+    - ${DRONE_COMMIT_SHA:0:8}
+    - ${DRONE_COMMIT_BRANCH}
+    - ${DRONE_COMMIT_BRANCH}-${DRONE_COMMIT_SHA:0:8}
+    username:
+      from_secret: docker-username
+  when:
+    branch:
+    - develop
+    - master
+
+- name: publish-on-tag-bitcoind
+  image: plugins/docker
+  settings:
+    auto_tag: true
+    daemon_off: true
+    dockerfile: Dockerfile
+    password:
+      from_secret: docker-password
+    registry: registry.cn-hongkong.aliyuncs.com
+    repo: registry.cn-hongkong.aliyuncs.com/imtoken/bitcoind
+    username:
+      from_secret: docker-username
+  when:
+    event:
+    - tag
+
+- name: slack
+  image: plugins/slack
+  settings:
+    template: "{{#if build.pull }}\n*{{#success build.status}}✔{{ else }}✘{{/success}} {{ uppercasefirst build.status }}*: <https://github.com/{{ repo.owner }}/{{ repo.name }}/pull/{{ build.pull }}|Pull Request #{{ build.pull }}>\n{{else}}\n*{{#success build.status}}✔{{ else }}✘{{/success}} {{ uppercasefirst build.status }}: Build #{{ build.number }}* (type: `{{ build.event }}`)\n{{/if}}\nCommit: {{ build.message.title }}(<https://github.com/{{ repo.owner }}/{{ repo.name }}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}>)\n{{#if build.tag }}\nTag: <https://github.com/{{ repo.owner }}/{{ repo.name }}/commits/{{ build.tag }}|{{ repo.name }} {{ build.tag }}>\n{{else}}\nBranch: <https://github.com/{{ repo.owner }}/{{ repo.name }}/commits/{{ build.branch }}|{{ repo.name }} {{ build.branch }}>\n{{/if}}\nAuthor: {{ build.author }}\n<{{ build.link }}|Visit build page ↗>\n"
+    webhook:
+      from_secret: drone-slack
+  when:
+    status:
+    - success
+    - failure
+
+trigger:
+  event:
+  - push
+  - tag
+  ref:
+  - refs/heads/develop
+  - refs/heads/master
+  - refs/heads/hotfix/*
+  - refs/heads/feature/*
+  - refs/heads/support/*
+  - refs/heads/release/*
+  - refs/tags/*
+
+---
+kind: secret
+name: gcp-bucket-sa
+
+get:
+  path: drone-gcp-sa-secrets
+  name: sa
+
+---
+kind: secret
+name: docker-username
+
+get:
+  path: image-registry-aliyun
+  name: username
+
+---
+kind: secret
+name: docker-password
+
+get:
+  path: image-registry-aliyun
+  name: password
+
+---
+kind: secret
+name: gcp-server-dev
+
+get:
+  path: drone-kubeconfig-gcp-dev
+  name: server
+
+---
+kind: secret
+name: gcp-token-dev
+
+get:
+  path: drone-kubeconfig-gcp-dev
+  name: token
+
+---
+kind: secret
+name: gcp-server-staging
+
+get:
+  path: drone-kubeconfig-gcp-staging
+  name: server
+
+---
+kind: secret
+name: gcp-token-staging
+
+get:
+  path: drone-kubeconfig-gcp-staging
+  name: token
+
+---
+kind: secret
+name: drone-slack
+
+get:
+  path: drone-slack-secrets
+  name: slack_webhook
+
+---
+kind: secret
+name: mvn-username
+
+get:
+  path: drone-mvn-secrets
+  name: username
+
+---
+kind: secret
+name: mvn-password
+
+get:
+  path: drone-mvn-secrets
+  name: password
+
+...
