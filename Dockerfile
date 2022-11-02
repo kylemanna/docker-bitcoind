@@ -44,11 +44,13 @@ LABEL author="Kyle Manna <kyle@kylemanna.com>" \
 
 WORKDIR /bitcoin
 
+# Set bitcoin user and group with static IDs
 ARG GROUP_ID=1000
 ARG USER_ID=1000
 RUN groupadd -g ${GROUP_ID} bitcoin \
     && useradd -u ${USER_ID} -g bitcoin -d /bitcoin bitcoin
 
+# Copy over bitcoind binaries
 COPY --chown=bitcoin:bitcoin --from=builder /opt/bitcoin/bin/ /usr/local/bin/
 
 # Upgrade all packages and install dependencies
@@ -57,11 +59,19 @@ RUN apt-get update \
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gosu \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Copy scripts to Docker image
 COPY ./bin ./docker-entrypoint.sh /usr/local/bin/
 
+# Enable entrypoint script
 ENTRYPOINT ["docker-entrypoint.sh"]
+
+# Set HOME
 ENV HOME /bitcoin
+
+# Expose default p2p and RPC ports
 EXPOSE 8332 8333
+
+# Expose default bitcoind storage location
 VOLUME ["/bitcoin/.bitcoin"]
 
 CMD ["btc_oneshot"]
