@@ -1,14 +1,11 @@
 # Use the latest available Ubuntu image as build stage
-FROM ubuntu:latest as builder
+FROM alpine:3 as builder
 
 # Upgrade all packages and install dependencies
-RUN apt-get update \
-    && apt-get upgrade -y
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+RUN set -ex && apk --update --no-cache upgrade
+RUN set -ex && apk add --update --no-cache \
         ca-certificates \
-        wget \
-        gnupg \
-    && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+        gnupg
 
 # Set variables necessary for download and verification of bitcoind
 ARG TARGETARCH
@@ -38,26 +35,22 @@ RUN case ${TARGETARCH:-amd64} in \
     && rm -v /opt/bitcoin/bin/test_bitcoin /opt/bitcoin/bin/bitcoin-qt
 
 # Use latest Ubuntu image as base for main image
-FROM ubuntu:latest
+FROM alpine:3
 LABEL author="Kyle Manna <kyle@kylemanna.com>" \
       maintainer="Seth For Privacy <seth@sethforprivacy.com>"
 
 WORKDIR /bitcoin
 
-# Set bitcoin user and group with static IDs
-ARG GROUP_ID=1000
-ARG USER_ID=1000
-RUN groupadd -g ${GROUP_ID} bitcoin \
-    && useradd -u ${USER_ID} -g bitcoin -d /bitcoin bitcoin
+# Set bitcoin user and group
+RUN set -ex && adduser -Ds /bin/bash bitcoin \
+    && mkdir -p /bitcoin/.bitcoin \
+    && chown -R bitcoin:bitcoin /bitcoin/.bitcoin
 
 # Copy over bitcoind binaries
 COPY --chown=bitcoin:bitcoin --from=builder /opt/bitcoin/bin/ /usr/local/bin/
 
 # Upgrade all packages and install dependencies
-RUN apt-get update \
-    && apt-get upgrade -y
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gosu \
-    && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN set -ex && apk --update --no-cache upgrade
 
 # Copy scripts to Docker image
 COPY ./bin ./docker-entrypoint.sh /usr/local/bin/
