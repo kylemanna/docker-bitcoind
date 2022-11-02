@@ -40,7 +40,7 @@ jobs:
         name: Checkout repository
         uses: actions/checkout@v3
       - 
-        name: Get Sparrow version
+        name: Get bitcoind version
         id: get_tag
         run: echo "::set-output name=tag::$(awk -F '=' '/VERSION=/ {print $2}' Dockerfile)"
       - 
