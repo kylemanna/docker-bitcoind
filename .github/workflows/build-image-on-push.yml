@@ -35,12 +35,12 @@ jobs:
           push: false
           load: true
           platforms: linux/amd64
-          tags: bitcoind:ubuntu-test
+          tags: bitcoind:amd64
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/bitcoind:latest
       - 
         name: Test-run x86_64 image
         run: |
-          docker run --rm bitcoind:ubuntu-test &
+          docker run --rm bitcoind:amd64 &
           PID=$!
           sleep 60
           kill -SIGINT $PID # this will return a non-zero exit code if the container dies early on
@@ -52,5 +52,5 @@ jobs:
           push: false
           load: true
           platforms: linux/arm64
-          tags: bitcoind:ubuntu-test
+          tags: bitcoind:arm64
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/bitcoind:latest
