@@ -43,7 +43,7 @@ jobs:
         name: Checkout repository
         uses: actions/checkout@v3
       - 
-        name: Get Sparrow version
+        name: Get bitcoind version
         id: get_tag
         run: echo "::set-output name=tag::$(awk -F '=' '/VERSION=/ {print $2}' Dockerfile)"
       - 
@@ -57,6 +57,13 @@ jobs:
           tags: bitcoind:amd64
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/bitcoind:latest
           cache-to: type=inline
+      - 
+        name: Test-run x86_64 image
+        run: |
+          docker run --rm bitcoind:amd64 &
+          PID=$!
+          sleep 60
+          kill -SIGINT $PID # this will return a non-zero exit code if the container dies early on
       - 
         name: Build and push to Docker Hub and GitHub Packages Docker Registry
         uses: docker/build-push-action@v3.2.0
