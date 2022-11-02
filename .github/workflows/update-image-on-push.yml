@@ -58,6 +58,13 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/bitcoind:latest
           cache-to: type=inline
       - 
+        name: Test-run x86_64 image
+        run: |
+          docker run --rm bitcoind:ubuntu-test &
+          PID=$!
+          sleep 60
+          kill -SIGINT $PID # this will return a non-zero exit code if the container dies early on
+      - 
         name: Build and push to Docker Hub and GitHub Packages Docker Registry
         uses: docker/build-push-action@v3.2.0
         id: docker_build_push
