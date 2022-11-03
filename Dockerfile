@@ -3,19 +3,28 @@
 #FROM alpine:latest
 
 FROM ubuntu:latest as builder
+ARG TARGETARCH
+
+FROM builder as builder_x86_64
+ENV ARCH=x86_64
+FROM builder as builder_arm
+ENV ARCH=arm
+FROM builder as builder_rscv64
+ENV ARCH=riscv64
+
+FROM builder_${TARGETARCH}
 
 # Testing: gosu
 #RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
 #    && apk add --update --no-cache gnupg gosu gcompat libgcc
 RUN apt update \
     && apt install -y --no-install-recommends \
-        ca-certificates \
-        wget \
-        gnupg \
+    ca-certificates \
+    wget \
+    gnupg \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ARG VERSION=23.0
-ARG ARCH=x86_64
 ARG BITCOIN_CORE_SIGNATURE=71A3B16735405025D447E8F274810B012346C9A6
 
 # Don't use base image's bitcoin package for a few reasons:
@@ -26,8 +35,8 @@ ARG BITCOIN_CORE_SIGNATURE=71A3B16735405025D447E8F274810B012346C9A6
 RUN cd /tmp \
     && gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys ${BITCOIN_CORE_SIGNATURE} \
     && wget https://bitcoincore.org/bin/bitcoin-core-${VERSION}/SHA256SUMS.asc \
-        https://bitcoincore.org/bin/bitcoin-core-${VERSION}/SHA256SUMS \
-        https://bitcoincore.org/bin/bitcoin-core-${VERSION}/bitcoin-${VERSION}-${ARCH}-linux-gnu.tar.gz \
+    https://bitcoincore.org/bin/bitcoin-core-${VERSION}/SHA256SUMS \
+    https://bitcoincore.org/bin/bitcoin-core-${VERSION}/bitcoin-${VERSION}-${ARCH}-linux-gnu.tar.gz \
     && gpg --verify --status-fd 1 --verify SHA256SUMS.asc SHA256SUMS 2>/dev/null | grep "^\[GNUPG:\] VALIDSIG.*${BITCOIN_CORE_SIGNATURE}\$" \
     && sha256sum --ignore-missing --check SHA256SUMS \
     && tar -xzvf bitcoin-${VERSION}-${ARCH}-linux-gnu.tar.gz -C /opt \
