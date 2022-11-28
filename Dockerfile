@@ -2,17 +2,17 @@
 # Alpine would be nice, but it's linked again musl and breaks the bitcoin core download binary
 #FROM alpine:latest
 
-FROM ubuntu:latest as builder
+FROM ubuntu:latest AS builder
 ARG TARGETARCH
 
-FROM builder as builder_x86_64
+FROM builder AS builder_amd64
 ENV ARCH=x86_64
-FROM builder as builder_arm
-ENV ARCH=arm
-FROM builder as builder_rscv64
+FROM builder AS builder_arm64
+ENV ARCH=aarch64
+FROM builder AS builder_riscv64
 ENV ARCH=riscv64
 
-FROM builder_${TARGETARCH}
+FROM builder_${TARGETARCH} AS build
 
 # Testing: gosu
 #RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
@@ -20,8 +20,9 @@ FROM builder_${TARGETARCH}
 RUN apt update \
     && apt install -y --no-install-recommends \
     ca-certificates \
-    wget \
     gnupg \
+    libatomic1 \
+    wget \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ARG VERSION=24.0
@@ -58,10 +59,10 @@ ARG USER_ID=1000
 RUN groupadd -g ${GROUP_ID} bitcoin \
     && useradd -u ${USER_ID} -g bitcoin -d /bitcoin bitcoin
 
-COPY --from=builder /opt/ /opt/
+COPY --from=build /opt/ /opt/
 
 RUN apt update \
-    && apt install -y --no-install-recommends gosu \
+    && apt install -y --no-install-recommends gosu libatomic1 \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && ln -sv /opt/bitcoin/bin/* /usr/local/bin
 
