@@ -9,7 +9,7 @@ env:
   AWS_DEFAULT_REGION: us-west-1
   AWS_ACCOUNT_ID: 144594246572
   IMAGE_NAME: ordinex/bitcoind
-  IMAGE_TAG: ${{ github.sha }}
+  IMAGE_TAG: ${{ github.sha | slice(0, 8) }}
 
 jobs:
   build-and-push:
