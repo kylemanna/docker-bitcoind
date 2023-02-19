@@ -3,16 +3,11 @@
 #FROM alpine:latest
 
 FROM ubuntu:latest AS builder
-ARG TARGETARCH
 
 FROM builder AS builder_amd64
 ENV ARCH=x86_64
-FROM builder AS builder_arm64
-ENV ARCH=aarch64
-FROM builder AS builder_riscv64
-ENV ARCH=riscv64
 
-FROM builder_${TARGETARCH} AS build
+FROM builder_amd64 AS build
 
 # Testing: gosu
 #RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
