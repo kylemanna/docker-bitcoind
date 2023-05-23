@@ -1,26 +1,44 @@
 ---
 kind: pipeline
+type: kubernetes
 name: docker-bitcoind
 
 platform:
   os: linux
   arch: amd64
 
+resources:
+  requests:
+    cpu: 500
+    memory: 500MiB
+
+trigger:
+  event:
+    - push
+    - tag
+  ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/heads/hotfix/*
+    - refs/heads/bugfix/*
+    - refs/heads/feature/*
+    - refs/heads/support/*
+    - refs/heads/release/*
+    - refs/tags/*
+    
+    
 steps:
 - name: publish-on-develop-bitcoind
-  image: plugins/docker
-  settings:
-    daemon_off: true
-    dockerfile: Dockerfile
-    password:
-      from_secret: docker-password
-    registry: registry.cn-hongkong.aliyuncs.com
-    repo: registry.cn-hongkong.aliyuncs.com/imtoken/bitcoind
+  image: asia-docker.pkg.dev/imtoken-210003/imtoken/docker
+  settings:  
+    registry: asia-docker.pkg.dev
+    repo: asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind    
     tags:
     - ${DRONE_COMMIT_SHA:0:8}
     - develop
-    username:
-      from_secret: docker-username
+    cache_from:
+    - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BRANCH}"
+    - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BEFORE:0:8}"
   when:
     branch:
     - hotfix/*
@@ -28,55 +46,45 @@ steps:
     - support/*
 
 - name: publish-on-release-bitcoind
-  image: plugins/docker
-  settings:
-    daemon_off: true
-    dockerfile: Dockerfile
-    password:
-      from_secret: docker-password
-    registry: registry.cn-hongkong.aliyuncs.com
-    repo: registry.cn-hongkong.aliyuncs.com/imtoken/bitcoind
+  image: asia-docker.pkg.dev/imtoken-210003/imtoken/docker
+  settings:  
+    registry: asia-docker.pkg.dev
+    repo: asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind 
     tags:
     - ${DRONE_COMMIT_SHA:0:8}
     - staging
-    username:
-      from_secret: docker-username
+    cache_from:
+    - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BRANCH}"
+    - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BEFORE:0:8}"
   when:
     branch:
     - release/*
 
 - name: publish-on-stable-branch-bitcoind
-  image: plugins/docker
+  image: asia-docker.pkg.dev/imtoken-210003/imtoken/docker
   settings:
-    daemon_off: true
-    dockerfile: Dockerfile
-    password:
-      from_secret: docker-password
-    registry: registry.cn-hongkong.aliyuncs.com
-    repo: registry.cn-hongkong.aliyuncs.com/imtoken/bitcoind
+    registry: asia-docker.pkg.dev
+    repo: asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind 
     tags:
     - ${DRONE_COMMIT_SHA:0:8}
     - ${DRONE_COMMIT_BRANCH}
     - ${DRONE_COMMIT_BRANCH}-${DRONE_COMMIT_SHA:0:8}
-    username:
-      from_secret: docker-username
+    cache_from:
+    - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BRANCH}"
+    - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BEFORE:0:8}"
   when:
     branch:
     - develop
     - master
 
 - name: publish-on-tag-bitcoind
-  image: plugins/docker
-  settings:
-    auto_tag: true
-    daemon_off: true
-    dockerfile: Dockerfile
-    password:
-      from_secret: docker-password
-    registry: registry.cn-hongkong.aliyuncs.com
-    repo: registry.cn-hongkong.aliyuncs.com/imtoken/bitcoind
-    username:
-      from_secret: docker-username
+  image: asia-docker.pkg.dev/imtoken-210003/imtoken/docker
+  settings:  
+    registry: asia-docker.pkg.dev
+    repo: asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind 
+    tags:
+      - ${DRONE_COMMIT_SHA:0:8}
+      - ${DRONE_TAG}
   when:
     event:
     - tag
@@ -92,18 +100,7 @@ steps:
     - success
     - failure
 
-trigger:
-  event:
-  - push
-  - tag
-  ref:
-  - refs/heads/develop
-  - refs/heads/master
-  - refs/heads/hotfix/*
-  - refs/heads/feature/*
-  - refs/heads/support/*
-  - refs/heads/release/*
-  - refs/tags/*
+
 
 ---
 kind: secret
@@ -113,21 +110,6 @@ get:
   path: drone-gcp-sa-secrets
   name: sa
 
----
-kind: secret
-name: docker-username
-
-get:
-  path: image-registry-aliyun
-  name: username
-
----
-kind: secret
-name: docker-password
-
-get:
-  path: image-registry-aliyun
-  name: password
 
 ---
 kind: secret
@@ -184,5 +166,3 @@ name: mvn-password
 get:
   path: drone-mvn-secrets
   name: password
-
-...
