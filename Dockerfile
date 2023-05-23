@@ -14,7 +14,7 @@ RUN apt update \
         gnupg \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ARG VERSION=23.0
+ARG VERSION=24.0.1
 ARG ARCH=x86_64
 ARG BITCOIN_CORE_SIGNATURE=71A3B16735405025D447E8F274810B012346C9A6
 
