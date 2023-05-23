@@ -7,12 +7,12 @@ FROM ubuntu:latest as builder
 # Testing: gosu
 #RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
 #    && apk add --update --no-cache gnupg gosu gcompat libgcc
-RUN sleep 100000
 RUN apt update \
     && apt install -y --no-install-recommends \
         ca-certificates \
         wget \
         gnupg \
+        libatomic1 \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ARG VERSION=24.0.1
@@ -53,7 +53,7 @@ RUN groupadd -g ${GROUP_ID} bitcoin \
 COPY --from=builder /opt/ /opt/
 
 RUN apt update \
-    && apt install -y --no-install-recommends gosu \
+    && apt install -y --no-install-recommends gosu libatomic1 \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && ln -sv /opt/bitcoin/bin/* /usr/local/bin
 
