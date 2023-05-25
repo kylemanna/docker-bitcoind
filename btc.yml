@@ -16,6 +16,7 @@ services:
         - VERSION=${BTCD_VERSION}
         - GROUP_ID=10000
         - USER_ID=10000
+        - BITCOIN_CORE_SIGNATURE=${GPG_SIGNATURE:-152812300785C96444D3334D17565732E08E5E41}
     image: bitcoind:local
     environment:
         - DISABLEWALLET=1
