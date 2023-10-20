@@ -8,7 +8,7 @@ x-logging: &logging
 
 services:
   bitcoind:
-    restart: "${RESTART}"
+    restart: unless-stopped
     build:
       context: ./
       dockerfile: Dockerfile

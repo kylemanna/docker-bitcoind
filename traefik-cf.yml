@@ -2,10 +2,14 @@ version: "3.4"
 services:
   traefik:
     image: traefik:latest
-    restart: ${RESTART}
+    restart: unless-stopped
     command:
-#      - --log.level=DEBUG
+#      - --accesslog=true
+#      - --accesslog.format=json
+#      - --accesslog.fields.defaultmode=keep
+#      - --accesslog.fields.headers.defaultmode=keep
 #      - --certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --log.level=${LOG_LEVEL:-info}
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
@@ -20,8 +24,8 @@ services:
       - ${TRAEFIK_WEB_PORT}:${TRAEFIK_WEB_PORT}/tcp
       - ${TRAEFIK_WEB_HTTP_PORT}:${TRAEFIK_WEB_HTTP_PORT}/tcp
     environment:
-      - CLOUDFLARE_EMAIL=${CF_EMAIL}
-      - CLOUDFLARE_DNS_API_TOKEN=${CF_API_TOKEN}
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+      - CF_ZONE_API_TOKEN=${CF_ZONE_API_TOKEN:-}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - certs:/letsencrypt
@@ -31,9 +35,9 @@ services:
       - cf-ddns
   cf-ddns:
     image: oznu/cloudflare-ddns:latest
-    restart: ${RESTART}
+    restart: unless-stopped
     environment:
-      - API_KEY=${CF_API_TOKEN}
+      - API_KEY=${CF_DNS_API_TOKEN}
       - ZONE=${DOMAIN}
       - SUBDOMAIN=${DDNS_SUBDOMAIN}
       - PROXIED=${DDNS_PROXY}
