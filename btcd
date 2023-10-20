@@ -96,10 +96,10 @@ determine_compose() {
 
 upgrade_compose() {
   if ! type -P docker-compose >/dev/null 2>&1; then
-    echo "Compose has already been updated to V2"
+    echo "Docker Compose has already been updated to V2"
     return
   fi
-  echo "Updating compose to V2"
+  echo "Updating Docker Compose to V2"
   if [[ "$__distro" = "ubuntu" ]]; then
     ${__auto_sudo} apt-get update && ${__auto_sudo} apt-get install -y ca-certificates curl gnupg lsb-release
     __major_version=$(lsb_release -r | cut -d: -f2 | sed s/'^\t'// | cut -d. -f1)
