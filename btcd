@@ -564,6 +564,13 @@ shift
 determine_distro
 determine_sudo
 handle_root
+
+# Don't check for docker before it's installed
+if [ "$command" = "install" ]; then
+    $command "$@"
+    exit "$?"
+fi
+
 determine_docker
 determine_compose
 
