@@ -107,6 +107,11 @@ upgrade_compose() {
       echo "This script cannot update Docker Compose on Ubuntu ${__major_version}. Consider upgrading to 22.04 or 20.04"
       exit 0
     fi
+    if dpkg-query -W -f='${Status}' docker.io 2>/dev/null | grep -q "ok installed"; then
+        ${__auto_sudo} apt-mark manual docker.io
+    elif dpkg-query -W -f='${Status}' docker-ce 2>/dev/null | grep -q "ok installed"; then
+        ${__auto_sudo} apt-mark manual docker-ce
+    fi
     ${__auto_sudo} apt-get remove -y docker-compose
     echo "Removed docker-compose"
     ${__auto_sudo} mkdir -p /etc/apt/keyrings
@@ -124,8 +129,13 @@ upgrade_compose() {
     ${__auto_sudo} apt-get update && ${__auto_sudo} apt-get -y install ca-certificates curl gnupg lsb-release
     __major_version=$(lsb_release -r | cut -f2)
     if [ "${__major_version}" -lt 10 ]; then
-        echo "This script cannot update compose on Debian ${__major_version}. Consider upgrading to 11 or 12."
+        echo "This script cannot update Docker Compose on Debian ${__major_version}. Consider upgrading to 11 or 12."
         exit 0
+    fi
+    if dpkg-query -W -f='${Status}' docker.io 2>/dev/null | grep -q "ok installed"; then
+        ${__auto_sudo} apt-mark manual docker.io
+    elif dpkg-query -W -f='${Status}' docker-ce 2>/dev/null | grep -q "ok installed"; then
+        ${__auto_sudo} apt-mark manual docker-ce
     fi
     ${__auto_sudo} apt-get remove -y docker-compose
     echo "Removed docker-compose"
@@ -141,7 +151,7 @@ upgrade_compose() {
     __compose_exe="docker compose"
     __compose_upgraded=1
   else
-    echo "This script does not know how to update compose on $__distro"
+    echo "This script does not know how to update Docker Compose on $__distro"
   fi
 }
 
