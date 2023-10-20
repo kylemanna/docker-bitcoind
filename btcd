@@ -44,7 +44,7 @@ determine_sudo() {
         systemctl status docker >/dev/null
         result=$?
         if [ ! "${result}" -eq 0 ]; then
-            echo "The docker daemon is not running. Please check docker installation."
+            echo "The Docker daemon is not running. Please check Docker installation."
             echo "\"sudo systemctl status docker\" and \"sudo journalctl -fu docker\" will be helpful."
             echo "Aborting."
             exit 1
@@ -53,7 +53,7 @@ determine_sudo() {
 
     __maybe_sudo=""
     if ! docker images >/dev/null 2>&1; then
-        echo "Will use sudo to access docker"
+        echo "Will use sudo to access Docker"
         __maybe_sudo="sudo"
     fi
 }
@@ -104,7 +104,7 @@ upgrade_compose() {
     ${__auto_sudo} apt-get update && ${__auto_sudo} apt-get install -y ca-certificates curl gnupg lsb-release
     __major_version=$(lsb_release -r | cut -d: -f2 | sed s/'^\t'// | cut -d. -f1)
     if [ "${__major_version}" -lt 20 ]; then
-      echo "This script cannot update compose on Ubuntu ${__major_version}. Consider upgrading to 22.04 or 20.04"
+      echo "This script cannot update Docker Compose on Ubuntu ${__major_version}. Consider upgrading to 22.04 or 20.04"
       exit 0
     fi
     ${__auto_sudo} apt-get remove -y docker-compose
@@ -115,7 +115,7 @@ upgrade_compose() {
         "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
         $(lsb_release -cs) stable" | ${__auto_sudo} tee /etc/apt/sources.list.d/docker.list > /dev/null
     ${__auto_sudo} apt-get update
-    ${__auto_sudo} apt-get install -y docker-compose-plugin
+    ${__auto_sudo} apt-get install -y docker-compose-plugin docker-buildx-plugin
     echo "Installed docker-compose-plugin"
     __old_compose=0
     __compose_exe="docker compose"
@@ -135,7 +135,7 @@ upgrade_compose() {
         "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
         $(lsb_release -cs) stable" | ${__auto_sudo} tee /etc/apt/sources.list.d/docker.list > /dev/null
     ${__auto_sudo} apt-get update
-    ${__auto_sudo} apt-get install -y docker-compose-plugin
+    ${__auto_sudo} apt-get install -y docker-compose-plugin docker-buildx-plugin
     echo "Installed docker-compose-plugin"
     __old_compose=0
     __compose_exe="docker compose"
@@ -158,13 +158,13 @@ handle_root() {
 check_for_snap() {
     if [[ "$__distro" = "ubuntu" && -n "$(which snap)" ]] && snap list 2>/dev/null | grep -qw 'docker'; then
         echo
-        echo "WARNING! Snap docker package detected. This WILL result in issues."
+        echo "WARNING! Snap Docker package detected. This WILL result in issues."
         echo "Removing the package will delete volumes and require a resync."
         echo
         echo "Doing so is still highly recommended however."
         echo
         echo "The exact steps depend a little on whether there already is"
-        echo "an apt version of docker installed as well, but in a nutshell"
+        echo "an apt version of Docker installed as well, but in a nutshell"
         echo '"./${me} stop" followed by "sudo snap remove --purge docker"'
         echo "and then a reboot, and as needed install docker.io or docker-ce with apt."
         echo
@@ -179,7 +179,7 @@ install() {
     check_for_snap
     set -e
     while true; do
-        read -rp "This will attempt to install docker and make your user part of the docker group. Do you wish to continue? (no/yes) " yn
+        read -rp "This will attempt to install Docker and make your user part of the docker group. Do you wish to continue? (no/yes) " yn
         case $yn in
             [Yy]* ) break;;
             * ) echo "Aborting, no changes made"; exit 0;;
@@ -188,17 +188,19 @@ install() {
     if [[ "$__distro" = "ubuntu" ]]; then
         __major_version=$(lsb_release -r | cut -d: -f2 | sed s/'^\t'// | cut -d. -f1)
         if [ "${__major_version}" -lt 20 ]; then
-            echo "This script cannot install docker on Ubuntu ${__major_version}. Consider upgrading to 22.04 or 20.04"
+            echo "This script cannot install Docker on Ubuntu ${__major_version}. Consider upgrading to 22.04 or 20.04"
         fi
         if [ -z "$(which docker)" ]; then
-            ${__auto_sudo} apt-get update && ${__auto_sudo} apt-get install -y ca-certificates curl gnupg lsb-release whiptail bc chrony
+            ${__auto_sudo} apt-get update && ${__auto_sudo} apt-get install -y ca-certificates curl gnupg lsb-release \
+                chrony pkg-config
             ${__auto_sudo} mkdir -p /etc/apt/keyrings
             ${__auto_sudo} curl -fsSL https://download.docker.com/linux/ubuntu/gpg | ${__auto_sudo} gpg --dearmor -o /etc/apt/keyrings/docker.gpg
             ${__auto_sudo} echo \
                 "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
                 $(lsb_release -cs) stable" | ${__auto_sudo} tee /etc/apt/sources.list.d/docker.list > /dev/null
             ${__auto_sudo} apt-get update
-            ${__auto_sudo} apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+            ${__auto_sudo} apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin \
+                docker-buildx-plugin
             echo "Installed docker-ce and docker-compose-plugin"
         else
             echo "Docker is already installed"
@@ -214,10 +216,10 @@ install() {
     elif [[ "$__distro" =~ "debian" ]]; then
         if [ -z "$(which docker)" ]; then
             ${__auto_sudo} apt-get update
-            ${__auto_sudo} apt-get -y install ca-certificates curl gnupg lsb-release whiptail bc chrony
+            ${__auto_sudo} apt-get -y install ca-certificates curl gnupg lsb-release chrony pkg-config
             __major_version=$(lsb_release -r | cut -f2)
             if [ "${__major_version}" -lt 10 ]; then
-                echo "This script cannot install docker on Debian ${__major_version}. Consider upgrading to 11 or 12."
+                echo "This script cannot install Docker on Debian ${__major_version}. Consider upgrading to 11 or 12."
                 exit 0
             fi
             ${__auto_sudo} mkdir -p /etc/apt/keyrings
@@ -226,7 +228,8 @@ install() {
                 "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
                 $(lsb_release -cs) stable" | ${__auto_sudo} tee /etc/apt/sources.list.d/docker.list > /dev/null
             ${__auto_sudo} apt-get update
-            ${__auto_sudo} apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+            ${__auto_sudo} apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin \
+                docker-buildx-plugin
             echo "Installed docker-ce and docker-compose-plugin"
         else
             echo "Docker is already installed"
@@ -240,7 +243,7 @@ install() {
             echo "Your user is already part of the docker group"
         fi
     else
-        echo "This script does not know how to install docker on $__distro"
+        echo "This script does not know how to install Docker on $__distro"
     fi
     set +e
     return 0
@@ -490,7 +493,7 @@ printhelp() {
     echo ""
     echo "subcommands:"
     echo "  install"
-    echo "     attempts to install docker and docker compose for you"
+    echo "     attempts to install Docker and Docker Compose for you"
     echo "  update"
     echo "     updates all client versions and ${__project_name} itself"
     echo "  up (or start)"
@@ -505,7 +508,7 @@ printhelp() {
     echo "  logs"
     echo "     shows logs"
     echo "  cmd <command>"
-    echo "     executes an arbitrary docker compose command. Use \"cmd help\" to list them"
+    echo "     executes an arbitrary Docker Compose command. Use \"cmd help\" to list them"
     echo "  terminate"
     echo "     stops the ${__app_name} and destroys all data stores"
     echo ""
@@ -516,7 +519,7 @@ printhelp() {
     echo "    shows logs only for ${__sample_service} service"
     echo ""
     echo ""
-    echo "$me will attempt to use sudo as needed for docker commands"
+    echo "$me will attempt to use sudo as needed for Docker commands"
     echo ""
 }
 
@@ -580,7 +583,7 @@ check_disk_space
 
 if [ "${__compose_upgraded}" -eq 1 ]; then
   echo
-  echo "You updated compose to V2."
+  echo "You updated Docker Compose to V2."
   echo "The \"docker-compose\" command is gone and replaced with \"docker compose\"."
   echo "You can create yourself an alias for \"docker-compose\"."
   echo
