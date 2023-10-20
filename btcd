@@ -145,13 +145,6 @@ upgrade_compose() {
   fi
 }
 
-prep_prometheus() {
-# Create custom-prom.yml if it doesn't exist
-    if [ ! -f "./prometheus/custom-prom.yml" ]; then
-        $__as_owner touch "./prometheus/custom-prom.yml"
-    fi
-}
-
 handle_root() {
     if [ "${EUID}" -eq 0 ]; then
         __as_owner="sudo -u ${OWNER}"
@@ -560,7 +553,6 @@ determine_sudo
 handle_root
 determine_docker
 determine_compose
-prep_prometheus
 
 if [ "$command" = "install" ]; then
     $command "$@"
