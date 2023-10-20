@@ -76,7 +76,7 @@ determine_compose() {
     if [ -n "${ETHDSECUNDO-}" ]  || [ ! "${command}" = "update" ]; then # Don't run this twice
       echo
       echo "You are using docker-compose ${__compose_version}, which is unsupported by Docker, Inc."
-      echo "${__project_name} will stop supporting it sometime fall 2023."
+      echo "${__project_name} will stop supporting it sometime early 2024."
       echo ""
       echo "It is recommended that you replace Compose V1 with Compose V2."
       while true; do
@@ -562,7 +562,6 @@ command="$1"
 shift
 
 determine_distro
-determine_sudo
 handle_root
 
 # Don't check for docker before it's installed
@@ -571,6 +570,7 @@ if [ "$command" = "install" ]; then
     exit "$?"
 fi
 
+determine_sudo
 determine_docker
 determine_compose
 
@@ -604,7 +604,7 @@ if [ "${__compose_upgraded}" -eq 1 ]; then
 elif [ "${__old_compose}" -eq 1 ]; then
   echo
   echo "You are using docker-compose ${__compose_version}, which is unsupported by Docker, Inc. since July 2023."
-  echo "${__project_name} will stop supporting it sometime fall 2023."
+  echo "${__project_name} will stop supporting it sometime early 2024."
   echo ""
   echo "A switch to docker-ce is recommended. It is *not* mandatory. This is unfortunately a manual step that"
   echo "${__project_name} cannot do for you."
