@@ -78,11 +78,11 @@ determine_compose() {
       echo "You are using docker-compose ${__compose_version}, which is unsupported by Docker, Inc."
       echo "${__project_name} will stop supporting it sometime fall 2023."
       echo ""
-      echo "It is recommended that you replace compose V1 with compose V2."
+      echo "It is recommended that you replace Compose V1 with Compose V2."
       while true; do
-        read -rp "Do you want to update compose to V2? (yes/no) " yn
+        read -rp "Do you want to update Docker Compose to V2? (yes/no) " yn
         case $yn in
-          [Nn]* ) echo "Please be sure to update compose yourself!"; break;;
+          [Nn]* ) echo "Please be sure to update Docker Compose yourself!"; break;;
            * ) upgrade_compose; break;;
         esac
       done
