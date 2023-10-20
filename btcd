@@ -574,11 +574,6 @@ fi
 determine_docker
 determine_compose
 
-if [ "$command" = "install" ]; then
-    $command "$@"
-    exit "$?"
-fi
-
 if ! dodocker images >/dev/null 2>&1; then
     echo "Please ensure you can call $__docker_exe before running this script."
     exit 1
