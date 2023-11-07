@@ -80,7 +80,7 @@ determine_compose() {
       echo
       echo "You are using docker-compose ${__compose_version}, which is unsupported by Docker, Inc."
       echo "${__project_name} only supports Compose V2."
-      echo ""
+      echo
       echo "It is recommended that you replace Compose V1 with Compose V2."
       while true; do
         read -rp "Do you want to update Docker Compose to V2? (yes/no) " yn
@@ -108,7 +108,7 @@ upgrade_compose() {
     ${__auto_sudo} apt-get update && ${__auto_sudo} apt-get install -y lsb-release
     __major_version=$(lsb_release -r | cut -d: -f2 | sed s/'^\t'// | cut -d. -f1)
     if [ "${__major_version}" -lt 20 ]; then
-      echo "This script cannot update Docker Compose on Ubuntu ${__major_version}."
+      echo "${__project_name} cannot update Docker Compose on Ubuntu ${__major_version}."
       echo "Consider upgrading to 20.04 and then 22.04."
       exit 1
     fi
@@ -128,7 +128,7 @@ upgrade_compose() {
     ${__auto_sudo} apt-get update && ${__auto_sudo} apt-get -y install ca-certificates curl gnupg lsb-release
     __major_version=$(lsb_release -r | cut -f2)
     if [ "${__major_version}" -lt 10 ]; then
-        echo "This script cannot update Docker Compose on Debian ${__major_version}."
+        echo "${__project_name} cannot update Docker Compose on Debian ${__major_version}."
         echo "Consider upgrading to 10, then 11 and then 12."
         exit 1
     fi
@@ -150,7 +150,7 @@ upgrade_compose() {
     __old_compose=0
     __compose_upgraded=1
   else
-    echo "This script does not know how to update Docker Compose on $__distro"
+    echo "${__project_name} does not know how to update Docker Compose on $__distro"
   fi
 }
 
@@ -275,6 +275,7 @@ check_disk_space() {
         exit 70
     fi
 
+# Adjust if your clients prune manually
 # Literal match intended
 # shellcheck disable=SC2076
     if [[ "${__free_space}" -lt 52428800 ]]; then
@@ -403,6 +404,7 @@ envmigrate() {
         return
     fi
 
+# Adjust these vars to your project
     ALL_VARS=( COMPOSE_FILE NETWORK SNAPSHOT LOG_LEVEL DOMAIN RPC_HOST RPC_LB WS_HOST WS_LB RPC_PORT WS_PORT P2P_PORT \
                X_SRC_BUILD_TARGET X_SRC_REPO X_DOCKER_TAG X_DOCKER_REPO X_DOCKERFILE )
     OLD_VARS=( )
@@ -424,6 +426,7 @@ envmigrate() {
     # Migrate over user settings
     for var in "${ALL_VARS[@]}"; do
         value=$(sed -n -e "s/^${var}=\(.*\)/\1/p" "${ENV_FILE}.source" || true)
+# Adjust for vars that are possibly empty
         if [ -n "${value}" ] || [ "${var}" = "SNAPSHOT" ]; then
             sed -i'.original' -e "s~^\(${var}\s*=\s*\).*$~\1${value}~" "${ENV_FILE}"
         fi
@@ -508,9 +511,9 @@ terminate() {
 # In this case I want the word splitting, so rm can remove all volumes
 # shellcheck disable=SC2046
     dodocker volume rm $(dodocker volume ls -q -f "name=^$(basename "$(realpath .)")_[^_]+")
-    echo ""
+    echo
     echo "All containers stopped and all volumes deleted"
-    echo ""
+    echo
 }
 
 
@@ -555,10 +558,11 @@ handle_error() {
 version() {
     # script version
     grep "^This is" README.md
-    echo ""
+    echo
     var="COMPOSE_FILE"
     value=$(sed -n -e "s/^${var}=\(.*\)/\1/p" "${ENV_FILE}" || true)
     # Client versions
+# Adjust for your clients and how to check their version
     case "${value}" in
         *x.yml* )
             docompose exec x-geth x-geth version
@@ -663,12 +667,12 @@ if [ "${__old_compose}" -eq 1 ]; then
 fi
 
 if ! dodocker images >/dev/null 2>&1; then
-    echo "Please ensure you can call $__docker_exe before running this script."
+    echo "Please ensure you can call $__docker_exe before running ${__me}."
     exit 1
 fi
 
 if ! docompose --help >/dev/null 2>&1; then
-    echo "Please ensure you can call $__compose_exe before running this script"
+    echo "Please ensure you can call $__compose_exe before running ${__me}."
     exit 1
 fi
 
