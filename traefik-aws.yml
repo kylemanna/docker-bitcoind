@@ -1,7 +1,7 @@
-version: "3.4"
 services:
   traefik:
     image: traefik-aws
+    pull_policy: build
     build:
       context: ./traefik
     restart: unless-stopped

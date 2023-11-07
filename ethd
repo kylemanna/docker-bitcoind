@@ -1,1 +1,612 @@
-btcd
+#!/usr/bin/env bash
+#set -euo pipefail
+set -uo pipefail
+
+__project_name="bitcoin-docker"
+__app_name="Bitcoin node"
+__sample_service="bitcoind"
+__docker_exe="docker"
+__compose_exe="docker compose"
+__compose_upgraded=0
+
+dodocker() {
+    $__docker_exe "$@"
+}
+
+docompose() {
+    $__compose_exe "$@"
+}
+
+determine_distro() {
+    # Determine OS platform
+    __uname=$(uname | tr "[:upper:]" "[:lower:]")
+    # If Linux, try to determine specific distribution
+    if [ "$__uname" == "linux" ]; then
+        # If available, use LSB to identify distribution
+        if [ -n "$(which lsb_release 2>/dev/null)" ]; then
+            __distro=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'//)
+        # Otherwise, use release info file
+        else
+            #__distro=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1)
+            __distro=$(find /etc -maxdepth 1 -type f -name '[A-Za-z]*[_-][rv]e[lr]*' | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1)
+        fi
+    else
+        __distro=""
+    fi
+    # For everything else (or if above failed), just use generic identifier
+    [ "$__distro" == "" ] && __distro=$__uname
+    unset __uname
+    __distro=$(echo "$__distro" | tr "[:upper:]" "[:lower:]")
+}
+
+determine_sudo() {
+    if [[ "$__distro" =~ "debian" || "$__distro" = "ubuntu" ]]; then
+        systemctl status docker >/dev/null
+        result=$?
+        if [ ! "${result}" -eq 0 ]; then
+            echo "The Docker daemon is not running. Please check Docker installation."
+            echo "\"sudo systemctl status docker\" and \"sudo journalctl -fu docker\" will be helpful."
+            echo "Aborting."
+            exit 1
+        fi
+    fi
+
+    __maybe_sudo=""
+    if ! docker images >/dev/null 2>&1; then
+        echo "Will use sudo to access Docker"
+        __maybe_sudo="sudo"
+    fi
+}
+
+determine_docker() {
+    if [ -n "$__maybe_sudo" ]; then
+        __docker_exe="sudo $__docker_exe"
+    fi
+}
+
+determine_compose() {
+# Check for Compose V2 (docker compose) vs Compose V1 (docker-compose)
+  if docker compose version >/dev/null 2>&1; then
+    __compose_exe="docker compose"
+    __old_compose=0
+  else
+    __compose_exe="docker-compose"
+    __old_compose=1
+    __compose_version=$($__maybe_sudo docker-compose --version | sed -n -E -e "s/.*version [v]?([0-9.-]*).*/\1/ip")
+    if [ -n "${ETHDSECUNDO-}" ]  || [ ! "${command}" = "update" ]; then # Don't run this twice
+      echo
+      echo "You are using docker-compose ${__compose_version}, which is unsupported by Docker, Inc."
+      echo "${__project_name} will stop supporting it sometime early 2024."
+      echo ""
+      echo "It is recommended that you replace Compose V1 with Compose V2."
+      while true; do
+        read -rp "Do you want to update Docker Compose to V2? (yes/no) " yn
+        case $yn in
+          [Nn]* ) echo "Please be sure to update Docker Compose yourself!"; break;;
+           * ) upgrade_compose; break;;
+        esac
+      done
+    fi
+  fi
+
+  if [ -n "$__maybe_sudo" ]; then
+    __compose_exe="sudo $__compose_exe"
+  fi
+}
+
+upgrade_compose() {
+  if ! type -P docker-compose >/dev/null 2>&1; then
+    echo "Docker Compose has already been updated to V2"
+    return
+  fi
+  echo "Updating Docker Compose to V2"
+  if [[ "$__distro" = "ubuntu" ]]; then
+    ${__auto_sudo} apt-get update && ${__auto_sudo} apt-get install -y ca-certificates curl gnupg lsb-release
+    __major_version=$(lsb_release -r | cut -d: -f2 | sed s/'^\t'// | cut -d. -f1)
+    if [ "${__major_version}" -lt 20 ]; then
+      echo "This script cannot update Docker Compose on Ubuntu ${__major_version}. Consider upgrading to 22.04 or 20.04"
+      exit 0
+    fi
+    if dpkg-query -W -f='${Status}' docker.io 2>/dev/null | grep -q "ok installed"; then
+        ${__auto_sudo} apt-mark manual docker.io
+    elif dpkg-query -W -f='${Status}' docker-ce 2>/dev/null | grep -q "ok installed"; then
+        ${__auto_sudo} apt-mark manual docker-ce
+    fi
+    ${__auto_sudo} apt-get remove -y docker-compose
+    echo "Removed docker-compose"
+    ${__auto_sudo} mkdir -p /etc/apt/keyrings
+    ${__auto_sudo} curl -fsSL https://download.docker.com/linux/ubuntu/gpg | ${__auto_sudo} gpg --dearmor --yes -o /etc/apt/keyrings/docker.gpg
+    ${__auto_sudo} echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        $(lsb_release -cs) stable" | ${__auto_sudo} tee /etc/apt/sources.list.d/docker.list > /dev/null
+    ${__auto_sudo} apt-get update
+    ${__auto_sudo} apt-get install -y docker-compose-plugin docker-buildx-plugin
+    echo "Installed docker-compose-plugin"
+    __old_compose=0
+    __compose_exe="docker compose"
+    __compose_upgraded=1
+  elif [[ "$__distro" =~ "debian" ]]; then
+    ${__auto_sudo} apt-get update && ${__auto_sudo} apt-get -y install ca-certificates curl gnupg lsb-release
+    __major_version=$(lsb_release -r | cut -f2)
+    if [ "${__major_version}" -lt 10 ]; then
+        echo "This script cannot update Docker Compose on Debian ${__major_version}. Consider upgrading to 11 or 12."
+        exit 0
+    fi
+    if dpkg-query -W -f='${Status}' docker.io 2>/dev/null | grep -q "ok installed"; then
+        ${__auto_sudo} apt-mark manual docker.io
+    elif dpkg-query -W -f='${Status}' docker-ce 2>/dev/null | grep -q "ok installed"; then
+        ${__auto_sudo} apt-mark manual docker-ce
+    fi
+    ${__auto_sudo} apt-get remove -y docker-compose
+    echo "Removed docker-compose"
+    ${__auto_sudo} mkdir -p /etc/apt/keyrings
+    ${__auto_sudo} curl -fsSL https://download.docker.com/linux/debian/gpg | ${__auto_sudo} gpg --dearmor --yes -o /etc/apt/keyrings/docker.gpg
+    ${__auto_sudo} echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+        $(lsb_release -cs) stable" | ${__auto_sudo} tee /etc/apt/sources.list.d/docker.list > /dev/null
+    ${__auto_sudo} apt-get update
+    ${__auto_sudo} apt-get install -y docker-compose-plugin docker-buildx-plugin
+    echo "Installed docker-compose-plugin"
+    __old_compose=0
+    __compose_exe="docker compose"
+    __compose_upgraded=1
+  else
+    echo "This script does not know how to update Docker Compose on $__distro"
+  fi
+}
+
+handle_root() {
+    if [ "${EUID}" -eq 0 ]; then
+        __as_owner="sudo -u ${OWNER}"
+        __auto_sudo=""
+    else
+        __as_owner=""
+        __auto_sudo="sudo"
+    fi
+}
+
+check_for_snap() {
+    if [[ "$__distro" = "ubuntu" && -n "$(which snap)" ]] && snap list 2>/dev/null | grep -qw 'docker'; then
+        echo
+        echo "WARNING! Snap Docker package detected. This WILL result in issues."
+        echo "Removing the package will delete volumes and require a resync."
+        echo
+        echo "Doing so is still highly recommended however."
+        echo
+        echo "The exact steps depend a little on whether there already is"
+        echo "an apt version of Docker installed as well, but in a nutshell"
+        echo '"./${me} stop" followed by "sudo snap remove --purge docker"'
+        echo "and then a reboot, and as needed install docker.io or docker-ce with apt."
+        echo
+        echo "Do join us on EthStaker Discord to work through this issue."
+        echo
+        echo "Aborting, this is not safe"
+        exit 1
+    fi
+}
+
+install() {
+    check_for_snap
+    set -e
+    while true; do
+        read -rp "This will attempt to install Docker and make your user part of the docker group. Do you wish to continue? (no/yes) " yn
+        case $yn in
+            [Yy]* ) break;;
+            * ) echo "Aborting, no changes made"; exit 0;;
+        esac
+    done
+    if [[ "$__distro" = "ubuntu" ]]; then
+        __major_version=$(lsb_release -r | cut -d: -f2 | sed s/'^\t'// | cut -d. -f1)
+        if [ "${__major_version}" -lt 20 ]; then
+            echo "This script cannot install Docker on Ubuntu ${__major_version}. Consider upgrading to 22.04 or 20.04"
+        fi
+        if [ -z "$(which docker)" ]; then
+            ${__auto_sudo} apt-get update && ${__auto_sudo} apt-get install -y ca-certificates curl gnupg lsb-release \
+                chrony pkg-config
+            ${__auto_sudo} mkdir -p /etc/apt/keyrings
+            ${__auto_sudo} curl -fsSL https://download.docker.com/linux/ubuntu/gpg | ${__auto_sudo} gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            ${__auto_sudo} echo \
+                "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+                $(lsb_release -cs) stable" | ${__auto_sudo} tee /etc/apt/sources.list.d/docker.list > /dev/null
+            ${__auto_sudo} apt-get update
+            ${__auto_sudo} apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin \
+                docker-buildx-plugin
+            echo "Installed docker-ce and docker-compose-plugin"
+        else
+            echo "Docker is already installed"
+        fi
+        __groups=$(${__as_owner} groups)
+        if [[ ! "$__groups" =~ "docker" ]]; then
+            echo "Making your user part of the docker group"
+            ${__auto_sudo} usermod -aG docker "${OWNER}"
+            echo "Please run newgrp docker or log out and back in"
+        else
+            echo "Your user is already part of the docker group"
+        fi
+    elif [[ "$__distro" =~ "debian" ]]; then
+        if [ -z "$(which docker)" ]; then
+            ${__auto_sudo} apt-get update
+            ${__auto_sudo} apt-get -y install ca-certificates curl gnupg lsb-release chrony pkg-config
+            __major_version=$(lsb_release -r | cut -f2)
+            if [ "${__major_version}" -lt 10 ]; then
+                echo "This script cannot install Docker on Debian ${__major_version}. Consider upgrading to 11 or 12."
+                exit 0
+            fi
+            ${__auto_sudo} mkdir -p /etc/apt/keyrings
+            ${__auto_sudo} curl -fsSL https://download.docker.com/linux/debian/gpg | ${__auto_sudo} gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            ${__auto_sudo} echo \
+                "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+                $(lsb_release -cs) stable" | ${__auto_sudo} tee /etc/apt/sources.list.d/docker.list > /dev/null
+            ${__auto_sudo} apt-get update
+            ${__auto_sudo} apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin \
+                docker-buildx-plugin
+            echo "Installed docker-ce and docker-compose-plugin"
+        else
+            echo "Docker is already installed"
+        fi
+        __groups=$(${__as_owner} groups)
+        if [[ ! "$__groups" =~ "docker" ]]; then
+            echo "Making your user part of the docker group"
+            ${__auto_sudo} usermod -aG docker "${OWNER}"
+            echo "Please run newgrp docker or log out and back in"
+        else
+            echo "Your user is already part of the docker group"
+        fi
+    else
+        echo "This script does not know how to install Docker on $__distro"
+    fi
+    set +e
+    return 0
+}
+
+# Warn user if space is low, so they can prune
+check_disk_space() {
+    __docker_dir=$(dodocker system info --format '{{.DockerRootDir}}')
+    __free_space=$(df -P "${__docker_dir}" | awk '/[0-9]%/{print $(NF-2)}')
+
+    re='^[0-9]+$'
+    if ! [[ "${__free_space}" =~ $re ]] ; then
+        echo "Unable to determine free disk space. This is likely a bug."
+        echo "df reports $(df -P "${__docker_dir}") and __free_space is ${__free_space}"
+        return
+    fi
+
+# Literal match intended
+# shellcheck disable=SC2076
+    if [[ "${__free_space}" -lt 52428800 ]]; then
+        echo ""
+        echo "You have less than 50 GiB of free disk space:"
+        echo ""
+        df -h "${__docker_dir}"
+        echo ""
+        echo "If total space is less than 1.5 TiB, consider cloning to a larger drive."
+        echo ""
+    fi
+}
+
+# Arguments are passed, but shellcheck doesn't recognize that
+# shellcheck disable=SC2120
+update() {
+    if [[ $(${__as_owner} git status --porcelain) ]]; then
+        __dirty=1
+    else
+        __dirty=0
+    fi
+
+    __free_space=$(df -P "$(pwd)" | awk '/[0-9]%/{print $(NF-2)}')
+
+    re='^[0-9]+$'
+    if ! [[ "${__free_space}" =~ $re ]] ; then
+        echo "Unable to determine free disk space. This is likely a bug."
+        echo "df reports $(df -P "$(pwd)") and __free_space is ${__free_space}"
+    elif [ "$(df -P "$(pwd)" | awk '/[0-9]%/{print $(NF-2)}')" -lt 1024 ]; then
+        echo "You have less than 1 MiB of space left on $(pwd)."
+        echo "Aborting, as an update is not safe."
+        exit 1
+    fi
+
+    __docker_dir=$(dodocker system info --format '{{.DockerRootDir}}')
+    __free_space=$(df -P "${__docker_dir}" | awk '/[0-9]%/{print $(NF-2)}')
+
+    re='^[0-9]+$'
+    if ! [[ "${__free_space}" =~ $re ]] ; then
+        echo "Unable to determine free disk space. This is likely a bug."
+        echo "df reports $(df -P "${__docker_dir}") and __free_space is ${__free_space}"
+    elif [ "${__free_space}" -lt 1048576 ]; then
+        echo "You have less than 1 GiB of space left on ${__docker_dir}."
+        echo "Aborting, as an update is not safe."
+        exit 1
+    fi
+
+    if [ -z "${ETHDSECUNDO-}" ]; then
+        # Do not track changes to ext-network.yml
+        ${__as_owner} git update-index --assume-unchanged ext-network.yml
+        ${__as_owner} git config pull.rebase false
+        ${__as_owner} git pull
+        # BASH_SOURCE so newer code gets to do the update. Use an ENV var
+        # to avoid infinite loop
+        export ETHDSECUNDO=1
+        exec "${BASH_SOURCE[0]}" update "$@"
+    fi
+
+    envmigrate
+
+    dodocker system prune --force
+    if [ ${__old_compose} -eq 1 ]; then
+      docompose --profile tools pull --ignore-pull-failures
+    else
+      docompose --profile tools pull --ignore-buildable
+    fi
+    docompose --profile tools build --pull
+
+    if ! cmp -s "${ENV_FILE}" "${ENV_FILE}".source; then
+        cp "${ENV_FILE}".source "${ENV_FILE}".bak
+        rm "${ENV_FILE}".source
+        echo "Your ${ENV_FILE} configuration settings have been migrated to a fresh copy. You can \
+find the original contents in ${ENV_FILE}.bak."
+        echo
+        echo "List of changes made to ${ENV_FILE} during migration - current on left, original on right:"
+        echo
+        diff -y --suppress-common-lines "${ENV_FILE}" "${ENV_FILE}".bak
+    else
+        echo "No changes made to ${ENV_FILE} during update"
+        rm "${ENV_FILE}".source
+    fi
+    echo
+    echo "A ./${me} up command will start using the new images and configuration."
+    if [[ "$__distro" = "ubuntu" ]]; then
+      __major_version=$(lsb_release -r | cut -d: -f2 | sed s/'^\t'// | cut -d. -f1)
+      if [ "${__major_version}" -lt 20 ]; then
+         echo
+         echo "Ubuntu ${__major_version} is older than the recommended 22.04 or 20.04 version"
+         echo
+      fi
+    fi
+
+    unset ETHDSECUNDO
+    check_for_snap
+    if [ "${__dirty}" -eq 1 ]; then
+        echo
+        echo "WARNING"
+        echo
+        echo "You have uncommitted local changes to ${__project_name}, which keeps updates from coming in."
+        echo "Please undo these changes or \"git commit\" them."
+        echo "These are the files with local changes:"
+        echo
+        ${__as_owner} git status --porcelain
+    fi
+}
+
+# envmigrate used to be called w/ arguments and checks for that
+# shellcheck disable=SC2120
+envmigrate() {
+    if [ ! -f "./${ENV_FILE}" ]; then
+        return
+    fi
+
+    ALL_VARS=( COMPOSE_FILE BTCD_VERSION GPG_SIGNATURE RPC_USER RPC_PW LOG_LEVEL DOMAIN ACME_EMAIL CF_DNS_API_TOKEN \
+               CF_ZONE_API_TOKEN AWS_PROFILE AWS_HOSTED_ZONE_ID BTC_HOST BTC_LB DDNS_SUBDOMAIN DDNS_PROXY \
+               TRAEFIK_WEB_PORT TRAEFIK_WEB_HTTP_PORT )
+    OLD_VARS=( CF_API_TOKEN )
+    NEW_VARS=( CF_DNS_API_TOKEN )
+
+    if [ "${EUID}" -eq 0 ]; then
+      sudo -u "${OWNER}" cp "${ENV_FILE}" "${ENV_FILE}".source
+      sudo -u "${OWNER}" cp default.env "${ENV_FILE}"
+    else
+      cp "${ENV_FILE}" "${ENV_FILE}".source
+      cp default.env "${ENV_FILE}"
+    fi
+    # Migrate over user settings
+    for var in "${ALL_VARS[@]}"; do
+        value=$(sed -n -e "s/^${var}=\(.*\)/\1/p" ".env.source" || true)
+        if [ -n "${value}" ]; then
+            sed -i'.original' -e "s~^\(${var}\s*=\s*\).*$~\1${value}~" "${ENV_FILE}"
+        fi
+    done
+    # Move value from old variable name(s) to new one(s)
+    for index in "${!OLD_VARS[@]}"; do
+        var=${OLD_VARS[index]}
+        value=$(sed -n -e "s/^${var}=\(.*\)/\1/p" ".env.source" || true)
+        if [ -n "${value}" ]; then
+            sed -i'.original' -e "s~^\(${NEW_VARS[index]}\s*=\s*\).*$~\1${value}~" "${ENV_FILE}"
+        fi
+    done
+    rm .env.original
+}
+
+upgrade() {
+  update
+}
+
+start() {
+    docompose up -d --remove-orphans
+}
+
+up() {
+    start
+}
+
+run() {
+    start
+}
+
+stop() {
+    docompose down --remove-orphans "$@"
+}
+
+down() {
+    stop "$@"
+}
+
+terminate() {
+    while true; do
+        read -rp "WARNING - this action will destroy all data stores for this ${__app_name}. Do you wish to continue? (No/Yes) " yn
+        case $yn in
+            [Yy]es ) break;;
+            * ) echo "Aborting, no changes made"; exit 1;;
+        esac
+    done
+
+    down
+    dodocker volume rm $(dodocker volume ls -q -f "name=^$(basename "$(realpath .)")_[^_]+")
+    echo ""
+    echo "All containers stopped and all volumes deleted"
+    echo ""
+}
+
+restart() {
+    stop "$@"
+    start
+}
+
+logs() {
+    docompose logs "$@"
+}
+
+cmd() {
+    docompose "$@"
+}
+
+set_value_in_env() {
+    # Assumes that "var" has been set to the name of the variable to be changed
+    if [ "${!var+x}" ]; then
+        if ! grep -qF "${var}" "${ENV_FILE}" 2>/dev/null ; then
+            echo "${var}=${!var}" >> "${ENV_FILE}"
+        else
+            sed -i'.original' -e "s~^\(${var}\s*=\s*\).*$~\1${!var}~" "${ENV_FILE}"
+        fi
+    fi
+}
+
+version() {
+    # ethd version
+    grep "^This is" README.md
+    echo ""
+    var="COMPOSE_FILE"
+    value=$(sed -n -e "s/^${var}=\(.*\)/\1/p" ".env" || true)
+    # Client versions
+    case "${value}" in
+        *btc.yml* )
+            docompose exec bitcoind bitcoind --version
+            echo
+            ;;&
+    esac
+}
+
+printhelp() {
+    echo "usage: ${me} [help|-h|--help] <subcommand>"
+    echo ""
+    echo "optional arguments:"
+    echo "  help | -h | --help"
+    echo "    print this message and exit"
+    echo ""
+    echo "subcommands:"
+    echo "  install"
+    echo "     attempts to install Docker and Docker Compose for you"
+    echo "  update"
+    echo "     updates all client versions and ${__project_name} itself"
+    echo "  up (or start)"
+    echo "     starts the ${__app_name}, or restarts containers that had their image or"
+    echo "     configuration changed"
+    echo "  down (or stop)"
+    echo "     stops the ${__app_name}"
+    echo "  restart"
+    echo "     restarts the ${__app_name}, a combination of down and up"
+    echo "  version"
+    echo "     prints the version(s) of currently running client(s)"
+    echo "  logs"
+    echo "     shows logs"
+    echo "  cmd <command>"
+    echo "     executes an arbitrary Docker Compose command. Use \"cmd help\" to list them"
+    echo "  terminate"
+    echo "     stops the ${__app_name} and destroys all data stores"
+    echo ""
+    echo ""
+    echo "The logs subcommand can be appended by flags and specify the container(s). example: "
+    echo ""
+    echo "  $me logs -f --tail 50 ${__sample_service}"
+    echo "    shows logs only for ${__sample_service} service"
+    echo ""
+    echo ""
+    echo "$me will attempt to use sudo as needed for Docker commands"
+    echo ""
+}
+
+me=$(basename "${BASH_SOURCE[0]}")
+
+if [[ "$#" -eq 0 || "$1" == "help" || "$1" == "-h" || "$1" == "--help" ]]; then
+    printhelp
+    exit 0
+fi
+
+cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+# Use this to make sure root doesn't end up owning files
+if [[ "$OSTYPE" == "darwin"* ]]; then
+# This is a macOS-ism
+# shellcheck disable=SC2016
+    OWNER=$(stat -f '$Su' .)
+else
+    OWNER=$(stat -c '%U' .)
+fi
+
+if [ "${OWNER}" == "root" ]; then
+    echo "Please install ${__project_name} as a non-root user."
+    exit 1
+fi
+
+ENV_FILE=.env
+__during_update=0
+
+command="$1"
+shift
+
+determine_distro
+handle_root
+
+# Don't check for docker before it's installed
+if [ "$command" = "install" ]; then
+    $command "$@"
+    exit "$?"
+fi
+
+determine_sudo
+determine_docker
+determine_compose
+
+if ! dodocker images >/dev/null 2>&1; then
+    echo "Please ensure you can call $__docker_exe before running this script."
+    exit 1
+fi
+
+if ! docompose --help >/dev/null 2>&1; then
+    echo "Please ensure you can call $__compose_exe before running this script"
+    exit 1
+fi
+
+$command "$@"
+
+__result=$?
+if [ "$__result" -eq 127 ]; then
+    printhelp
+fi
+
+check_disk_space
+
+if [ "${__compose_upgraded}" -eq 1 ]; then
+  echo
+  echo "You updated Docker Compose to V2."
+  echo "The \"docker-compose\" command is gone and replaced with \"docker compose\"."
+  echo "You can create yourself an alias for \"docker-compose\"."
+  echo
+  echo "Optionally, you can switch to docker-ce."
+  echo "Please see https://ethdocker.com/Usage/Prerequisites#switching-from-dockerio-to-docker-ce for instructions."
+elif [ "${__old_compose}" -eq 1 ]; then
+  echo
+  echo "You are using docker-compose ${__compose_version}, which is unsupported by Docker, Inc. since July 2023."
+  echo "${__project_name} will stop supporting it sometime early 2024."
+  echo ""
+  echo "A switch to docker-ce is recommended. It is *not* mandatory. This is unfortunately a manual step that"
+  echo "${__project_name} cannot do for you."
+  echo "Please see https://ethdocker.com/Usage/Prerequisites#switching-from-dockerio-to-docker-ce for instructions."
+fi

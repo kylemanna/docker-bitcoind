@@ -1,4 +1,3 @@
-version: "3.4"
 x-logging: &logging
   logging:
     driver: json-file
@@ -18,6 +17,7 @@ services:
         - USER_ID=10000
         - BITCOIN_CORE_SIGNATURE=${GPG_SIGNATURE:-152812300785C96444D3334D17565732E08E5E41}
     image: bitcoind:local
+    pull_policy: build
     environment:
         - DISABLEWALLET=1
         - PRINTTOCONSOLE=1
