@@ -56,4 +56,4 @@ Documentation
 
 * Additional documentation in the [docs folder](docs).
 
-This is bitcoin-docker v1.0.0
+This is bitcoin-docker v2.0.0

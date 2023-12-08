@@ -38,6 +38,9 @@ services:
       - docker-entrypoint.sh
     command:
       - btc_oneshot
+      - -rpcbind=:8332
+      - -rpcallowip=0.0.0.0/0
+      - -v2transport=1
     labels:
       - traefik.enable=true
       - traefik.http.routers.btc.entrypoints=websecure
