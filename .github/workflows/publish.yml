@@ -1,4 +1,4 @@
-name: ci
+name: publish
 
 on:
   push:
@@ -21,10 +21,19 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      -
+        name: Extract version from Dockerfile
+        run: |
+          VERSION=$(grep -oP '(?<=ARG VERSION=).*' Dockerfile)
+          echo "::set-env name=DOCKER_TAG::$VERSION"
+
       -
         name: Build and push
         uses: docker/build-push-action@v5
         with:
           push: true
-          platforms: linux/amd64,linux/arm64,linux/armhf, linux/arm
-          tags: lcd1232/bitcoind:latest
+          platforms: linux/amd64,linux/arm64,linux/armhf,linux/arm
+          tags: |
+            lcd1232/bitcoind:${{ env.DOCKER_TAG }}
+            lcd1232/bitcoind:latest
