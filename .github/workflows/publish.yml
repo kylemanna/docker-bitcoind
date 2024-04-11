@@ -41,5 +41,5 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            lcd1232/bitcoind:${{ steps.extract_version.outputs.docker_tag }}
-            lcd1232/bitcoind:latest
+            kylemanna/bitcoind:${{ steps.extract_version.outputs.docker_tag }}
+            kylemanna/bitcoind:latest
