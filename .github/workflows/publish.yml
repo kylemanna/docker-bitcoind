@@ -41,7 +41,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          platforms: linux/amd64,linux/arm64,linux/armhf,linux/arm
+          platforms: linux/amd64,linux/arm64
           tags: |
             lcd1232/bitcoind:${{ steps.extract_version.outputs.docker_tag }}
             lcd1232/bitcoind:latest
