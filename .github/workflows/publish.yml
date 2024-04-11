@@ -34,13 +34,7 @@ jobs:
           # Remove trailing whitespace or newline characters
           VERSION=$(echo $VERSION | tr -d '\r\n')
           echo "version is $VERSION"
-          echo "docker_tag=$VERSION" >> $GITHUB_ENV
-      
-      -
-        name: Debug
-        run: |
-          echo ${{ steps.extract_version.outputs.docker_tag }}
-          echo "lcd1232/bitcoind:${{ steps.extract_version.outputs.docker_tag }}"
+          echo "docker_tag=$VERSION" >> $GITHUB_OUTPUT
 
       -
         name: Build and push
@@ -48,4 +42,6 @@ jobs:
         with:
           push: true
           platforms: linux/amd64,linux/arm64,linux/armhf,linux/arm
-          tags: lcd1232/bitcoind:${{ steps.extract_version.outputs.docker_tag }},lcd1232/bitcoind:latest
+          tags: |
+            lcd1232/bitcoind:${{ steps.extract_version.outputs.docker_tag }}
+            lcd1232/bitcoind:latest
