@@ -35,6 +35,12 @@ jobs:
           VERSION=$(echo $VERSION | tr -d '\r\n')
           echo "version is $VERSION"
           echo "docker_tag=$VERSION" >> $GITHUB_ENV
+      
+      -
+        name: Debug
+        run: |
+          echo ${{ steps.extract_version.outputs.docker_tag }}
+          echo "lcd1232/bitcoind:${{ steps.extract_version.outputs.docker_tag }}"
 
       -
         name: Build and push
