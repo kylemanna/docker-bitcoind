@@ -33,6 +33,7 @@ jobs:
           VERSION=$(grep -oP '(?<=ARG VERSION=).*' Dockerfile)
           # Remove trailing whitespace or newline characters
           VERSION=$(echo $VERSION | tr -d '\r\n')
+          echo "version is $VERSION"
           echo "docker_tag=$VERSION" >> $GITHUB_ENV
 
       -
@@ -41,6 +42,4 @@ jobs:
         with:
           push: true
           platforms: linux/amd64,linux/arm64,linux/armhf,linux/arm
-          tags: |
-            "lcd1232/bitcoind:${{ steps.extract_version.outputs.docker_tag }}"
-            "lcd1232/bitcoind:latest"
+          tags: lcd1232/bitcoind:${{ steps.extract_version.outputs.docker_tag }},lcd1232/bitcoind:latest
