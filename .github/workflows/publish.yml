@@ -28,9 +28,10 @@ jobs:
 
       -
         name: Extract version from Dockerfile
+        id: extract_version
         run: |
           VERSION=$(grep -oP '(?<=ARG VERSION=).*' Dockerfile)
-          echo "::set-env name=DOCKER_TAG::$VERSION"
+          echo "docker_tag=$VERSION" >> $GITHUB_ENV
 
       -
         name: Build and push
@@ -39,5 +40,5 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64,linux/armhf,linux/arm
           tags: |
-            lcd1232/bitcoind:${{ env.DOCKER_TAG }}
+            lcd1232/bitcoind:${{ steps.extract_version.outputs.docker_tag }}
             lcd1232/bitcoind:latest
