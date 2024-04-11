@@ -42,5 +42,5 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64,linux/armhf,linux/arm
           tags: |
-            lcd1232/bitcoind:${{ steps.extract_version.outputs.docker_tag }}
-            lcd1232/bitcoind:latest
+            "lcd1232/bitcoind:${{ steps.extract_version.outputs.docker_tag }}"
+            "lcd1232/bitcoind:latest"
