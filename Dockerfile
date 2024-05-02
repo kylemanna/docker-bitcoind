@@ -56,7 +56,8 @@ WORKDIR /bitcoin
 
 ARG GROUP_ID=1000
 ARG USER_ID=1000
-RUN groupadd -g ${GROUP_ID} bitcoin \
+RUN userdel ubuntu \
+    && groupadd -g ${GROUP_ID} bitcoin \
     && useradd -u ${USER_ID} -g bitcoin -d /bitcoin bitcoin
 
 COPY --from=build /opt/ /opt/
