@@ -2,7 +2,7 @@
 # Alpine would be nice, but it's linked again musl and breaks the bitcoin core download binary
 #FROM alpine:latest
 
-FROM ubuntu:latest as builder
+FROM ubuntu:latest AS builder
 
 # Testing: gosu
 #RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
@@ -39,7 +39,7 @@ FROM ubuntu:latest
 LABEL maintainer="Kyle Manna <kyle@kylemanna.com>"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-ENV HOME /bitcoin
+ENV HOME=/bitcoin
 EXPOSE 8332 8333
 VOLUME ["/bitcoin/.bitcoin"]
 WORKDIR /bitcoin
