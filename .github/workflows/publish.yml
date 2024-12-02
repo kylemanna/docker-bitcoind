@@ -1,0 +1,45 @@
+name: publish
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      -
+        name: Extract version from Dockerfile
+        id: extract_version
+        run: |
+          VERSION=$(grep -oP '(?<=ARG VERSION=).*' Dockerfile)
+          echo "version is $VERSION"
+          echo "docker_tag=$VERSION" >> $GITHUB_OUTPUT
+
+      -
+        name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            kylemanna/bitcoind:${{ steps.extract_version.outputs.docker_tag }}
+            kylemanna/bitcoind:latest
