@@ -1,0 +1,20 @@
+services:
+  bitcoin:
+    build:
+      context: .            
+      dockerfile: Dockerfile  
+      args:
+        TARGETARCH: ${TARGETARCH} 
+    image: ${IMAGE_NAME}:latest
+    container_name: ${CONTAINER_NAME}
+    restart: unless-stopped
+    ports:
+      - "8332:8332"  # RPC
+      - "8333:8333"  # P2P
+    volumes:
+      - ${BITCOIN_DIR}:/bitcoin/.bitcoin
+    environment:
+      - USER_ID=1000
+      - GROUP_ID=1000
+    entrypoint: ["docker-entrypoint.sh"]
+    command: ["btc_oneshot"]
