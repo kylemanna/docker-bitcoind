@@ -25,7 +25,7 @@ RUN apt update \
     wget \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ARG VERSION=29.1
+ARG VERSION=30.0
 ARG BITCOIN_CORE_SIGNATURE=71A3B16735405025D447E8F274810B012346C9A6
 
 # Don't use base image's bitcoin package for a few reasons:
@@ -42,8 +42,8 @@ RUN cd /tmp \
     && sha256sum --ignore-missing --check SHA256SUMS \
     && tar -xzvf bitcoin-${VERSION}-${ARCH}-linux-gnu.tar.gz -C /opt \
     && ln -sv bitcoin-${VERSION} /opt/bitcoin \
-    && /opt/bitcoin/bin/test_bitcoin --show_progress \
-    && rm -v /opt/bitcoin/bin/test_bitcoin /opt/bitcoin/bin/bitcoin-qt
+    && /opt/bitcoin/libexec/test_bitcoin --show_progress \
+    && rm -v /opt/bitcoin/libexec/test_bitcoin /opt/bitcoin/bin/bitcoin-qt
 
 FROM ubuntu:latest
 LABEL maintainer="Kyle Manna <kyle@kylemanna.com>"
