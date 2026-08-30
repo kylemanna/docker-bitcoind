@@ -2,7 +2,7 @@
 # Alpine would be nice, but it's linked again musl and breaks the bitcoin core download binary
 #FROM alpine:latest
 
-FROM ubuntu:latest AS builder
+FROM docker.io/library/ubuntu:latest AS builder
 ARG TARGETARCH
 
 FROM builder AS builder_amd64
@@ -49,7 +49,7 @@ RUN cd /tmp \
     && /opt/bitcoin/libexec/test_bitcoin --show_progress \
     && rm -v /opt/bitcoin/libexec/test_bitcoin /opt/bitcoin/bin/bitcoin-qt
 
-FROM ubuntu:latest
+FROM docker.io/library/ubuntu:latest
 LABEL maintainer="Kyle Manna <kyle@kylemanna.com>"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
