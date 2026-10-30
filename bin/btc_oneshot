@@ -10,7 +10,7 @@ btc_init
 if [ $# -eq 0 ]; then
     # If IPv6 is in the container do both:
     #set -- '-rpcbind=[::]:8332' '-rpcallowip=::/0' '-rpcallowip=0.0.0.0/0'
-    set -- '-rpcbind=:8332' '-rpcallowip=0.0.0.0/0'
+    set -- '-rpcbind=0.0.0.0:8332' '-rpcallowip=0.0.0.0/0'
 fi
 
 exec bitcoind "$@"
